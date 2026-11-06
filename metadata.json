@@ -1,0 +1,6 @@
+{
+  "name": "AquaFabz - Water Refilling Station & Delivery Management System",
+  "description": "Web-Based Sales, Inventory, Container, Customer, Vending Machine, and Location Mapping Management System for a Water Refilling Station.",
+  "requestFramePermissions": ["geolocation"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
