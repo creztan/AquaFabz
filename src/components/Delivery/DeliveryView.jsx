@@ -365,6 +365,7 @@ export const DeliveryView = () => {
               heightClass="h-[550px]"
               showVendingMachines={true}
               showAllCustomers={true}
+              onUpdateStatus={(id, status) => updateOrderStatus(id, status)}
             />
           </div>
 
@@ -526,7 +527,7 @@ export const DeliveryView = () => {
                       <button
                         type="button"
                         onClick={() => updateOrderStatus(order.id, 'Out for Delivery')}
-                        className="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-xs transition-all shadow-md flex items-center justify-center gap-1.5"
+                        className="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-xs transition-all shadow-md flex items-center justify-center gap-1.5 cursor-pointer"
                       >
                         <Truck className="w-4 h-4" />
                         <span>Depart / Out for Delivery</span>

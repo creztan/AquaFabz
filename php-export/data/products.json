@@ -1,0 +1,98 @@
+[
+  {
+    "id": 1,
+    "product_id": "prod-1",
+    "code": "REF-PUR-RND",
+    "name": "Purified Water Refill (5-Gal Round)",
+    "category": "refill",
+    "water_type": "purified",
+    "price": 25.00,
+    "stock": 180,
+    "min_stock": 30,
+    "unit": "refill"
+  },
+  {
+    "id": 2,
+    "product_id": "prod-2",
+    "code": "REF-PUR-SLM",
+    "name": "Purified Water Refill (5-Gal Slim w/ Faucet)",
+    "category": "refill",
+    "water_type": "purified",
+    "price": 25.00,
+    "stock": 160,
+    "min_stock": 25,
+    "unit": "refill"
+  },
+  {
+    "id": 3,
+    "product_id": "prod-3",
+    "code": "REF-MIN-RND",
+    "name": "Mineral Water Refill (5-Gal Round)",
+    "category": "refill",
+    "water_type": "mineral",
+    "price": 30.00,
+    "stock": 140,
+    "min_stock": 25,
+    "unit": "refill"
+  },
+  {
+    "id": 4,
+    "product_id": "prod-4",
+    "code": "REF-ALK-RND",
+    "name": "Alkaline Water Refill (pH 9.5)",
+    "category": "refill",
+    "water_type": "alkaline",
+    "price": 40.00,
+    "stock": 95,
+    "min_stock": 20,
+    "unit": "refill"
+  },
+  {
+    "id": 5,
+    "product_id": "prod-5",
+    "code": "CON-SLM-NEW",
+    "name": "New 5-Gallon Slim Container w/ Faucet",
+    "category": "container",
+    "water_type": "none",
+    "price": 220.00,
+    "stock": 45,
+    "min_stock": 15,
+    "unit": "piece"
+  },
+  {
+    "id": 6,
+    "product_id": "prod-6",
+    "code": "CON-RND-NEW",
+    "name": "New 5-Gallon Round Container",
+    "category": "container",
+    "water_type": "none",
+    "price": 200.00,
+    "stock": 50,
+    "min_stock": 15,
+    "unit": "piece"
+  },
+  {
+    "id": 7,
+    "product_id": "prod-7",
+    "code": "ACC-CAP-NON",
+    "name": "Non-Spill Bottle Cap (Pack of 5)",
+    "category": "accessory",
+    "water_type": "none",
+    "price": 35.00,
+    "stock": 120,
+    "min_stock": 30,
+    "unit": "pack"
+  },
+  {
+    "id": 8,
+    "product_id": "prod-8",
+    "code": "ACC-PMP-MAN",
+    "name": "Manual Hand Press Water Pump",
+    "category": "accessory",
+    "water_type": "none",
+    "price": 120.00,
+    "stock": 30,
+    "min_stock": 10,
+    "unit": "unit"
+  }
+]

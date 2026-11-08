@@ -1,0 +1,64 @@
+[
+  {
+    "id": 1,
+    "order_id": "ord-101",
+    "order_number": "ORD-2026-001",
+    "customer_id": "cust-1",
+    "customer_name": "Barangay Health Center - Enclaro",
+    "customer_phone": "0918-444-1122",
+    "delivery_address": "Health Center Compound, Purok 3",
+    "barangay": "Brgy. Enclaro",
+    "order_type": "delivery",
+    "status": "Out for Delivery",
+    "payment_method": "cash",
+    "total_amount": 165.00,
+    "containers_to_return_count": 5,
+    "assigned_personnel": "Christan Jacob M. Verde",
+    "items": [
+      {
+        "productId": "prod-1",
+        "productName": "Purified Water Refill (5-Gal Round)",
+        "quantity": 5,
+        "price": 25.00,
+        "subtotal": 125.00
+      }
+    ],
+    "delivery_fee": 15.00,
+    "coordinates": {
+      "lat": 10.2025,
+      "lng": 122.8615
+    },
+    "created_at": "2026-11-08 09:30:00"
+  },
+  {
+    "id": 2,
+    "order_id": "ord-102",
+    "order_number": "ORD-2026-002",
+    "customer_id": "cust-2",
+    "customer_name": "Aling Nena Store & Eatery",
+    "customer_phone": "0920-555-7788",
+    "delivery_address": "National Highway cor. Pag-Asa St.",
+    "barangay": "Brgy. Enclaro",
+    "order_type": "delivery",
+    "status": "Preparing",
+    "payment_method": "cash",
+    "total_amount": 190.00,
+    "containers_to_return_count": 6,
+    "assigned_personnel": "Christan Jacob M. Verde",
+    "items": [
+      {
+        "productId": "prod-1",
+        "productName": "Purified Water Refill (5-Gal Round)",
+        "quantity": 6,
+        "price": 25.00,
+        "subtotal": 150.00
+      }
+    ],
+    "delivery_fee": 15.00,
+    "coordinates": {
+      "lat": 10.2008,
+      "lng": 122.8592
+    },
+    "created_at": "2026-11-08 10:15:00"
+  }
+]

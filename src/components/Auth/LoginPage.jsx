@@ -38,8 +38,9 @@ export const LoginPage = ({
   const [showPassword, setShowPassword] = useState(false);
 
   // Form States for Customer Portal
-  const [selectedCustomerId, setSelectedCustomerId] = useState(customers[0]?.id || '');
-  const [customCustomerQuery, setCustomCustomerQuery] = useState('');
+  const [customerIdentifier, setCustomerIdentifier] = useState('verde');
+  const [customerPassword, setCustomerPassword] = useState('password123');
+  const [showCustomerPassword, setShowCustomerPassword] = useState(false);
 
   const [errorMessage, setErrorMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -57,6 +58,9 @@ export const LoginPage = ({
     } else if (portalKey === 'delivery') {
       setUsername('jacob');
       setPassword('password123');
+    } else if (portalKey === 'customer') {
+      setCustomerIdentifier('verde');
+      setCustomerPassword('password123');
     }
   };
 
@@ -81,13 +85,11 @@ export const LoginPage = ({
     setErrorMessage('');
     setIsLoading(true);
 
-    const query = customCustomerQuery.trim() || selectedCustomerId;
-
     setTimeout(() => {
-      const res = loginAsCustomer(query);
+      const res = loginAsCustomer(customerIdentifier, customerPassword);
       setIsLoading(false);
       if (!res.success) {
-        setErrorMessage(res.message || 'Customer portal login failed.');
+        setErrorMessage(res.message || 'Customer login failed. Please verify your credentials.');
       } else {
         if (onSuccess) onSuccess();
       }
@@ -406,40 +408,138 @@ export const LoginPage = ({
           {/* CUSTOMER PORTAL FORM */}
           {selectedPortal === 'customer' && (
             <form onSubmit={handleCustomerSubmit} className="space-y-4 text-xs">
-              <div>
-                <label className="font-medium text-slate-300 block mb-1.5">Select Registered Customer Account:</label>
-                <select
-                  value={selectedCustomerId}
-                  onChange={(e) => {
-                    setSelectedCustomerId(e.target.value);
-                    setCustomCustomerQuery('');
-                  }}
-                  className="w-full px-3 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-white font-medium focus:outline-none focus:border-blue-500 mb-2 cursor-pointer"
-                >
-                  {customers.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.name} ({c.customerType} · {c.barangay})
-                    </option>
-                  ))}
-                </select>
-
-                <input
-                  type="text"
-                  placeholder="Or type customer name / contact number..."
-                  value={customCustomerQuery}
-                  onChange={(e) => setCustomCustomerQuery(e.target.value)}
-                  className="w-full px-3 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 text-xs"
-                />
+              {/* Account Security Notice */}
+              <div className="p-3 rounded-xl bg-blue-950/40 border border-blue-800/40 text-blue-200 text-[11px] flex items-start gap-2.5">
+                <ShieldCheck className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
+                <div>
+                  <strong className="text-white block">Account Protection & Order Verification:</strong>
+                  <span>
+                    Customer accounts require your username/email and password to prevent unauthorized refill orders, protect container balances, and prevent account exploitation.
+                  </span>
+                </div>
               </div>
 
+              {/* Username or Email / Phone */}
+              <div>
+                <label className="font-medium text-slate-300 block mb-1.5">
+                  Customer Username, Registered Email, or Mobile:
+                </label>
+                <div className="relative">
+                  <User className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    placeholder="e.g. verde or verde.family@gmail.com or 0939-111-2233"
+                    value={customerIdentifier}
+                    onChange={(e) => setCustomerIdentifier(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2.5 bg-slate-950/80 border border-slate-800 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 text-xs font-medium"
+                    required
+                  />
+                </div>
+              </div>
+
+              {/* Password */}
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="font-medium text-slate-300">Customer Password:</label>
+                  <span className="text-[10px] text-slate-400">Default demo: password123</span>
+                </div>
+                <div className="relative">
+                  <Lock className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <input
+                    type={showCustomerPassword ? 'text' : 'password'}
+                    placeholder="Enter your customer password"
+                    value={customerPassword}
+                    onChange={(e) => setCustomerPassword(e.target.value)}
+                    className="w-full pl-10 pr-10 py-2.5 bg-slate-950/80 border border-slate-800 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 text-xs"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowCustomerPassword(!showCustomerPassword)}
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 p-1"
+                  >
+                    {showCustomerPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+
+              {/* Quick Demo Customer Account Shortcuts */}
+              <div>
+                <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block mb-1.5">
+                  Quick-Fill Verified Demo Accounts:
+                </span>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setCustomerIdentifier('verde');
+                      setCustomerPassword('password123');
+                    }}
+                    className={`p-2 rounded-xl border text-left cursor-pointer transition-colors ${
+                      customerIdentifier === 'verde'
+                        ? 'bg-blue-950/80 border-blue-500 text-white'
+                        : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-slate-200'
+                    }`}
+                  >
+                    <div className="font-bold text-[11px] truncate">Verde Family</div>
+                    <div className="text-[10px] text-cyan-400 font-mono">verde</div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setCustomerIdentifier('mamachits');
+                      setCustomerPassword('password123');
+                    }}
+                    className={`p-2 rounded-xl border text-left cursor-pointer transition-colors ${
+                      customerIdentifier === 'mamachits'
+                        ? 'bg-blue-950/80 border-blue-500 text-white'
+                        : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-slate-200'
+                    }`}
+                  >
+                    <div className="font-bold text-[11px] truncate">Mama Chit's Grill</div>
+                    <div className="text-[10px] text-cyan-400 font-mono">mamachits</div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setCustomerIdentifier('binalbagan_it');
+                      setCustomerPassword('password123');
+                    }}
+                    className={`p-2 rounded-xl border text-left cursor-pointer transition-colors ${
+                      customerIdentifier === 'binalbagan_it'
+                        ? 'bg-blue-950/80 border-blue-500 text-white'
+                        : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-slate-200'
+                    }`}
+                  >
+                    <div className="font-bold text-[11px] truncate">Binalbagan IT Dept</div>
+                    <div className="text-[10px] text-cyan-400 font-mono">binalbagan_it</div>
+                  </button>
+                </div>
+              </div>
+
+              {/* Submit Button */}
               <button
                 type="submit"
                 disabled={isLoading}
                 className="w-full py-3.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold shadow-lg shadow-blue-600/25 transition-all flex items-center justify-center gap-2 text-xs cursor-pointer"
               >
-                <span>{isLoading ? 'Opening Customer Portal...' : 'Enter Customer Refill Portal'}</span>
+                <span>{isLoading ? 'Verifying Account Security...' : 'Secure Sign In to Customer Portal'}</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
+
+              {/* Sign up prompt */}
+              <div className="text-center pt-1">
+                <span className="text-slate-400 text-xs">Don't have a customer profile yet? </span>
+                <button
+                  type="button"
+                  onClick={onNavigateToRegister}
+                  className="text-cyan-400 hover:text-cyan-300 font-bold underline cursor-pointer"
+                >
+                  Register as Customer
+                </button>
+              </div>
             </form>
           )}
         </div>

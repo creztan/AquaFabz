@@ -1,0 +1,47 @@
+[
+  {
+    "id": 1,
+    "customer_id": "cust-1",
+    "name": "Barangay Health Center - Enclaro",
+    "phone": "0918-444-1122",
+    "address": "Health Center Compound, Purok 3",
+    "barangay": "Brgy. Enclaro",
+    "city": "Binalbagan",
+    "customer_type": "institutional",
+    "containers_held": 6,
+    "total_orders": 24,
+    "total_spent": 4200.00,
+    "lat": 10.2025,
+    "lng": 122.8615
+  },
+  {
+    "id": 2,
+    "customer_id": "cust-2",
+    "name": "Aling Nena Store & Eatery",
+    "phone": "0920-555-7788",
+    "address": "National Highway cor. Pag-Asa St.",
+    "barangay": "Brgy. Enclaro",
+    "city": "Binalbagan",
+    "customer_type": "commercial",
+    "containers_held": 8,
+    "total_orders": 38,
+    "total_spent": 5600.00,
+    "lat": 10.2008,
+    "lng": 122.8592
+  },
+  {
+    "id": 3,
+    "customer_id": "cust-3",
+    "name": "Dr. Ronald Mendoza",
+    "phone": "0917-888-9900",
+    "address": "Block 4, Lot 12, Villa Binalbagan Subd.",
+    "barangay": "Brgy. Paglaum",
+    "city": "Binalbagan",
+    "customer_type": "residential",
+    "containers_held": 3,
+    "total_orders": 14,
+    "total_spent": 1450.00,
+    "lat": 10.2050,
+    "lng": 122.8550
+  }
+]

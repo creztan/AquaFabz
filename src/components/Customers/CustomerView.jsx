@@ -46,7 +46,8 @@ export const CustomerView = () => {
   const [custEmail, setCustEmail] = useState('');
   const [custType, setCustType] = useState('Residential');
   const [custAddress, setCustAddress] = useState('');
-  const [custBarangay, setCustBarangay] = useState('Brgy. Poblacion');
+  const [custBarangay, setCustBarangay] = useState('Brgy. Enclaro');
+  const [custContainers, setCustContainers] = useState('0');
   const [custLat, setCustLat] = useState(settings.coordinates.lat);
   const [custLng, setCustLng] = useState(settings.coordinates.lng);
   const [custNotes, setCustNotes] = useState('');
@@ -69,7 +70,8 @@ export const CustomerView = () => {
     setCustEmail('');
     setCustType('Residential');
     setCustAddress('');
-    setCustBarangay('Brgy. Poblacion');
+    setCustBarangay('Brgy. Enclaro');
+    setCustContainers('0');
     // slight offset from station HQ
     setCustLat(settings.coordinates.lat + (Math.random() - 0.5) * 0.01);
     setCustLng(settings.coordinates.lng + (Math.random() - 0.5) * 0.01);
@@ -137,6 +139,7 @@ export const CustomerView = () => {
           lng: custLng,
         },
         deliveryNotes: custNotes,
+        containersHeld: parseInt(custContainers, 10) || 0,
         status: 'active',
       });
       setSelectedCustomer(created);
@@ -564,33 +567,48 @@ export const CustomerView = () => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div className="sm:col-span-2">
-                  <label className="font-semibold text-slate-700 block mb-1">Street Address & Landmark:</label>
+              <div className="grid grid-cols-1 sm:grid-cols-12 gap-3">
+                <div className="sm:col-span-6">
+                  <label className="font-semibold text-slate-700 block mb-1">Street Address / Purok & Landmark:</label>
                   <input
                     type="text"
-                    placeholder="e.g. Door 2 Medico Building, Gen. Luna St."
+                    placeholder="e.g. Purok 3, Near Brgy. Hall / Highway cor. Pag-Asa"
                     value={custAddress}
                     onChange={(e) => setCustAddress(e.target.value)}
                     className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl"
                     required
                   />
                 </div>
-                <div>
-                  <label className="font-semibold text-slate-700 block mb-1">Barangay:</label>
+                <div className="sm:col-span-3">
+                  <label className="font-semibold text-slate-700 block mb-1">Barangay (Binalbagan):</label>
                   <select
                     value={custBarangay}
                     onChange={(e) => setCustBarangay(e.target.value)}
                     className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl"
                   >
-                    <option value="Brgy. Poblacion">Brgy. Poblacion</option>
-                    <option value="Brgy. San Teodoro">Brgy. San Teodoro</option>
-                    <option value="Brgy. San Pedro">Brgy. San Pedro</option>
                     <option value="Brgy. Enclaro">Brgy. Enclaro</option>
+                    <option value="Brgy. Poblacion">Brgy. Poblacion</option>
                     <option value="Brgy. Sto. Rosario">Brgy. Sto. Rosario</option>
                     <option value="Brgy. Paglaum">Brgy. Paglaum</option>
+                    <option value="Brgy. San Jose">Brgy. San Jose</option>
+                    <option value="Brgy. Canmoros">Brgy. Canmoros</option>
                     <option value="Brgy. Progreso">Brgy. Progreso</option>
+                    <option value="Brgy. Amontay">Brgy. Amontay</option>
+                    <option value="Brgy. Marina">Brgy. Marina</option>
+                    <option value="Brgy. Bi-ao">Brgy. Bi-ao</option>
                   </select>
+                </div>
+                <div className="sm:col-span-3">
+                  <label className="font-semibold text-slate-700 block mb-1">Initial 5-Gal Jugs Held:</label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="50"
+                    placeholder="0"
+                    value={custContainers}
+                    onChange={(e) => setCustContainers(e.target.value)}
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-mono"
+                  />
                 </div>
               </div>
 

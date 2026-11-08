@@ -19,6 +19,11 @@ import {
   Home,
   LogIn,
   UserPlus,
+  MapPin,
+  Building2,
+  Store,
+  FileText,
+  Check,
 } from 'lucide-react';
 
 
@@ -35,6 +40,11 @@ export const RegisterPage = ({
   const [role, setRole] = useState('customer');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('09');
+  const [address, setAddress] = useState('');
+  const [barangay, setBarangay] = useState('Brgy. Enclaro');
+  const [customerType, setCustomerType] = useState('Residential');
+  const [containersHeld, setContainersHeld] = useState('0');
+  const [deliveryNotes, setDeliveryNotes] = useState('');
   const [password, setPassword] = useState('password123');
   const [confirmPassword, setConfirmPassword] = useState('password123');
   const [showPassword, setShowPassword] = useState(false);
@@ -50,6 +60,18 @@ export const RegisterPage = ({
 
     if (!name.trim() || !username.trim()) {
       setErrorMessage('Please provide both your full name and preferred username.');
+      return;
+    }
+
+    if (role === 'customer' && !address.trim()) {
+      setErrorMessage('Please enter your delivery street address or house/purok number for water refilling delivery.');
+      return;
+    }
+
+    // Phone validation
+    const cleanPhone = phone.replace(/[^0-9]/g, '');
+    if (cleanPhone.length < 10) {
+      setErrorMessage('Please provide a valid 11-digit mobile number (e.g. 0917-123-4567).');
       return;
     }
 
@@ -77,6 +99,11 @@ export const RegisterPage = ({
         role,
         email: email.trim() || `${username.toLowerCase()}@aquafabz-station.com`,
         phone: phone.trim(),
+        address: address.trim() || `${barangay}, Binalbagan`,
+        barangay: barangay,
+        customerType: customerType,
+        containersHeld: parseInt(containersHeld, 10) || 0,
+        deliveryNotes: deliveryNotes.trim(),
         password,
         status: 'active',
         avatar: `https://images.unsplash.com/photo-${1530000000000 + Math.floor(Math.random() * 9999999)}?w=150&auto=format&fit=crop&q=80`,
@@ -161,118 +188,62 @@ export const RegisterPage = ({
           <div className="lg:col-span-5 space-y-6">
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-300 text-xs font-semibold">
               <Sparkles className="w-3.5 h-3.5" />
-              <span>Role Selection & Portal Access</span>
+              <span>Customer Self-Service Portal</span>
             </div>
 
             <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight leading-tight">
-              Create your account at <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-400">AquaFabz</span>.
+              Register as a <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-400">Customer</span>.
             </h1>
 
             <p className="text-xs text-slate-300 leading-relaxed">
-              Select your role below to access customer ordering, station counter POS, delivery rider dispatch maps, or administrative management.
+              Sign up to order 16-stage purified, mineral, and alkaline water refills delivered directly to your doorstep in Binalbagan.
             </p>
 
-            {/* Role descriptions */}
+            {/* Customer Portal Features */}
             <div className="space-y-3 pt-2">
-              <div
-                onClick={() => {
-                  setRole('customer');
-                  setErrorMessage('');
-                }}
-                className={`p-3.5 rounded-2xl border cursor-pointer transition-all ${
-                  role === 'customer'
-                    ? 'bg-emerald-950/40 border-emerald-500 ring-2 ring-emerald-500/20'
-                    : 'bg-slate-900/60 border-slate-800 hover:border-slate-700'
-                }`}
-              >
-                <div className="flex items-center justify-between mb-1">
-                  <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-xs">
-                      <Home className="w-4 h-4" />
-                    </div>
-                    <h4 className="font-bold text-xs text-white">Customer / Resident</h4>
-                  </div>
-                  {role === 'customer' && <CheckCircle2 className="w-4 h-4 text-emerald-400" />}
+              <div className="p-3.5 rounded-2xl border border-slate-800 bg-slate-900/60 flex items-start gap-3">
+                <div className="w-8 h-8 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center shrink-0 font-bold text-xs mt-0.5">
+                  <Droplets className="w-4 h-4" />
                 </div>
-                <p className="text-[11px] text-slate-400">
-                  Order water refills online, track delivery rider location, manage borrowed 5-gallon jug deposits, and view purchase receipts.
-                </p>
+                <div>
+                  <h4 className="font-bold text-xs text-white">Online Water Refill Ordering</h4>
+                  <p className="text-[11px] text-slate-400 mt-0.5">
+                    Order 5-gallon slim or round dispenser jugs with zero hassle, with cash on delivery or GCash options.
+                  </p>
+                </div>
               </div>
 
-              <div
-                onClick={() => {
-                  setRole('staff');
-                  setErrorMessage('');
-                }}
-                className={`p-3.5 rounded-2xl border cursor-pointer transition-all ${
-                  role === 'staff'
-                    ? 'bg-cyan-950/40 border-cyan-500 ring-2 ring-cyan-500/20'
-                    : 'bg-slate-900/60 border-slate-800 hover:border-slate-700'
-                }`}
-              >
-                <div className="flex items-center justify-between mb-1">
-                  <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 rounded-lg bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-bold text-xs">
-                      <ShoppingCart className="w-4 h-4" />
-                    </div>
-                    <h4 className="font-bold text-xs text-white">Staff / Cashier</h4>
-                  </div>
-                  {role === 'staff' && <CheckCircle2 className="w-4 h-4 text-cyan-400" />}
+              <div className="p-3.5 rounded-2xl border border-slate-800 bg-slate-900/60 flex items-start gap-3">
+                <div className="w-8 h-8 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center shrink-0 font-bold text-xs mt-0.5">
+                  <Truck className="w-4 h-4" />
                 </div>
-                <p className="text-[11px] text-slate-400">
-                  Record walk-in purchases, manage container swap slips, stock in/out supplies, and process customer orders.
-                </p>
+                <div>
+                  <h4 className="font-bold text-xs text-white">Live Delivery Rider Tracking</h4>
+                  <p className="text-[11px] text-slate-400 mt-0.5">
+                    Follow your delivery queue status as our rider departs the station and approaches your purok.
+                  </p>
+                </div>
               </div>
 
-              <div
-                onClick={() => {
-                  setRole('delivery');
-                  setErrorMessage('');
-                }}
-                className={`p-3.5 rounded-2xl border cursor-pointer transition-all ${
-                  role === 'delivery'
-                    ? 'bg-indigo-950/40 border-indigo-500 ring-2 ring-indigo-500/20'
-                    : 'bg-slate-900/60 border-slate-800 hover:border-slate-700'
-                }`}
-              >
-                <div className="flex items-center justify-between mb-1">
-                  <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 rounded-lg bg-indigo-500/20 text-indigo-400 flex items-center justify-center font-bold text-xs">
-                      <Truck className="w-4 h-4" />
-                    </div>
-                    <h4 className="font-bold text-xs text-white">Delivery Rider</h4>
-                  </div>
-                  {role === 'delivery' && <CheckCircle2 className="w-4 h-4 text-indigo-400" />}
+              <div className="p-3.5 rounded-2xl border border-slate-800 bg-slate-900/60 flex items-start gap-3">
+                <div className="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0 font-bold text-xs mt-0.5">
+                  <CheckCircle2 className="w-4 h-4" />
                 </div>
-                <p className="text-[11px] text-slate-400">
-                  Access live digital delivery map, customer directions, empty jug pick-up slips, and one-tap delivery confirmations.
-                </p>
+                <div>
+                  <h4 className="font-bold text-xs text-white">Borrowed Container Deposit Ledger</h4>
+                  <p className="text-[11px] text-slate-400 mt-0.5">
+                    Keep accurate track of all 5-gallon containers currently held at your home or business.
+                  </p>
+                </div>
               </div>
+            </div>
 
-              <div
-                onClick={() => {
-                  setRole('admin');
-                  setErrorMessage('');
-                }}
-                className={`p-3.5 rounded-2xl border cursor-pointer transition-all ${
-                  role === 'admin'
-                    ? 'bg-purple-950/40 border-purple-500 ring-2 ring-purple-500/20'
-                    : 'bg-slate-900/60 border-slate-800 hover:border-slate-700'
-                }`}
-              >
-                <div className="flex items-center justify-between mb-1">
-                  <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 rounded-lg bg-purple-500/20 text-purple-400 flex items-center justify-center font-bold text-xs">
-                      <Shield className="w-4 h-4" />
-                    </div>
-                    <h4 className="font-bold text-xs text-white">Administrator</h4>
-                  </div>
-                  {role === 'admin' && <CheckCircle2 className="w-4 h-4 text-purple-400" />}
-                </div>
-                <p className="text-[11px] text-slate-400">
-                  Full control over pricing, financial reports, vending machine telemetry, staff accounts, and activity audit logs.
-                </p>
-              </div>
+            {/* Station Personnel Notice */}
+            <div className="p-3.5 rounded-2xl border border-indigo-950 bg-indigo-950/30 text-[11px] text-indigo-200/80 flex items-start gap-2.5">
+              <ShieldCheck className="w-4 h-4 text-indigo-400 shrink-0 mt-0.5" />
+              <span>
+                <strong>Station Personnel Notice:</strong> Cashier, Delivery Rider, and Staff accounts are created and managed exclusively by the Administrator inside the Station Admin Console.
+              </span>
             </div>
           </div>
 
@@ -282,13 +253,13 @@ export const RegisterPage = ({
               <div>
                 <div className="flex items-center gap-2 text-cyan-400 text-xs font-bold uppercase tracking-wider mb-1">
                   <ShieldCheck className="w-4 h-4" />
-                  <span>Account Registration</span>
+                  <span>Customer Registration</span>
                 </div>
                 <h2 className="text-2xl font-black text-white">
-                  Register Account ({role.toUpperCase()})
+                  Customer / Resident Sign Up
                 </h2>
                 <p className="text-xs text-slate-400 mt-1">
-                  Create a secure login account for the water refilling station platform.
+                  Create your profile to start ordering refills and tracking container deliveries.
                 </p>
               </div>
 
@@ -300,67 +271,38 @@ export const RegisterPage = ({
               )}
 
               <form onSubmit={handleSubmit} className="space-y-3.5 text-xs">
-                <div>
-                  <label className="font-semibold text-slate-300 block mb-1">Full Name:</label>
-                  <div className="relative">
-                    <User className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                    <input
-                      type="text"
-                      placeholder="e.g. Maria Clara Santos"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      className="w-full pl-10 pr-4 py-2.5 bg-slate-800/90 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 text-xs"
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="font-semibold text-slate-300 block mb-1">Username:</label>
+                    <label className="font-semibold text-slate-300 block mb-1">Full Name:</label>
+                    <div className="relative">
+                      <User className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                      <input
+                        type="text"
+                        placeholder="e.g. Maria Clara Santos"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        className="w-full pl-10 pr-4 py-2.5 bg-slate-800/90 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 text-xs"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="font-semibold text-slate-300 block mb-1">Preferred Username:</label>
                     <input
                       type="text"
                       placeholder="e.g. msantos"
                       value={username}
                       onChange={(e) => setUsername(e.target.value)}
-                      className="w-full px-3 py-2.5 bg-slate-800/90 border border-slate-700 rounded-xl text-white placeholder-slate-500 font-mono text-xs focus:outline-none focus:border-cyan-500"
+                      className="w-full px-3.5 py-2.5 bg-slate-800/90 border border-slate-700 rounded-xl text-white placeholder-slate-500 font-mono text-xs focus:outline-none focus:border-cyan-500"
                       required
                     />
-                  </div>
-                  <div>
-                    <label className="font-semibold text-slate-300 block mb-1">Role Selected:</label>
-                    <select
-                      value={role}
-                      onChange={(e) => {
-                        setRole(e.target.value );
-                        setErrorMessage('');
-                      }}
-                      className="w-full px-3 py-2.5 bg-slate-800/90 border border-slate-700 rounded-xl text-white font-semibold text-xs focus:outline-none focus:border-cyan-500"
-                    >
-                      <option value="customer">Customer / Resident</option>
-                      <option value="staff">Staff / Cashier</option>
-                      <option value="delivery">Delivery Rider</option>
-                      <option value="admin">Administrator</option>
-                    </select>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="font-semibold text-slate-300 block mb-1">Email (Optional):</label>
-                    <div className="relative">
-                      <Mail className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
-                      <input
-                        type="email"
-                        placeholder="user@aquafabz.com"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        className="w-full pl-9 pr-3 py-2.5 bg-slate-800/90 border border-slate-700 rounded-xl text-white placeholder-slate-500 text-xs focus:outline-none focus:border-cyan-500"
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <label className="font-semibold text-slate-300 block mb-1">Contact Phone:</label>
+                    <label className="font-semibold text-slate-300 block mb-1">Contact Mobile Phone:</label>
                     <div className="relative">
                       <Phone className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
                       <input
@@ -368,8 +310,22 @@ export const RegisterPage = ({
                         placeholder="0918-000-0000"
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
-                        className="w-full pl-9 pr-3 py-2.5 bg-slate-800/90 border border-slate-700 rounded-xl text-white placeholder-slate-500 text-xs focus:outline-none focus:border-cyan-500"
+                        className="w-full pl-9 pr-3 py-2.5 bg-slate-800/90 border border-slate-700 rounded-xl text-white placeholder-slate-500 text-xs focus:outline-none focus:border-cyan-500 font-mono"
                         required
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="font-semibold text-slate-300 block mb-1">Email Address (Optional):</label>
+                    <div className="relative">
+                      <Mail className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+                      <input
+                        type="email"
+                        placeholder="maria@gmail.com"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="w-full pl-9 pr-3 py-2.5 bg-slate-800/90 border border-slate-700 rounded-xl text-white placeholder-slate-500 text-xs focus:outline-none focus:border-cyan-500"
                       />
                     </div>
                   </div>
@@ -429,6 +385,90 @@ export const RegisterPage = ({
                     </div>
                   </div>
                 </div>
+
+                {/* Specialized Customer Delivery Profile (Enhanced Registration) */}
+                {role === 'customer' && (
+                  <div className="p-3.5 bg-slate-950/70 rounded-2xl border border-cyan-900/40 space-y-3">
+                    <div className="flex items-center gap-1.5 text-cyan-400 font-bold text-xs">
+                      <MapPin className="w-3.5 h-3.5" />
+                      <span>Water Delivery Address & Profile</span>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2.5">
+                      <div>
+                        <label className="font-semibold text-slate-300 block mb-1">Barangay (Binalbagan):</label>
+                        <select
+                          value={barangay}
+                          onChange={(e) => setBarangay(e.target.value)}
+                          className="w-full px-3 py-2 bg-slate-800/90 border border-slate-700 rounded-xl text-white text-xs focus:outline-none focus:border-cyan-500 font-medium"
+                        >
+                          <option value="Brgy. Enclaro">Brgy. Enclaro (Crossing Pag-Asa)</option>
+                          <option value="Brgy. Poblacion">Brgy. Poblacion (Town Proper)</option>
+                          <option value="Brgy. Sto. Rosario">Brgy. Sto. Rosario (Market Area)</option>
+                          <option value="Brgy. Paglaum">Brgy. Paglaum</option>
+                          <option value="Brgy. San Jose">Brgy. San Jose (Biscom Mill)</option>
+                          <option value="Brgy. Canmoros">Brgy. Canmoros</option>
+                          <option value="Brgy. Progreso">Brgy. Progreso</option>
+                          <option value="Brgy. Amontay">Brgy. Amontay</option>
+                          <option value="Brgy. Marina">Brgy. Marina</option>
+                          <option value="Brgy. Bi-ao">Brgy. Bi-ao</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="font-semibold text-slate-300 block mb-1">Customer Category:</label>
+                        <select
+                          value={customerType}
+                          onChange={(e) => setCustomerType(e.target.value)}
+                          className="w-full px-3 py-2 bg-slate-800/90 border border-slate-700 rounded-xl text-white text-xs focus:outline-none focus:border-cyan-500 font-medium"
+                        >
+                          <option value="Residential">Residential Household</option>
+                          <option value="Commercial">Commercial (Store/Eatery)</option>
+                          <option value="Institutional">Institutional (Office/Clinic)</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="font-semibold text-slate-300 block mb-1">Street / House No. / Purok:</label>
+                      <input
+                        type="text"
+                        placeholder="e.g. Purok 3, Near Brgy. Hall / Highway cor. Pag-Asa"
+                        value={address}
+                        onChange={(e) => setAddress(e.target.value)}
+                        className="w-full px-3 py-2 bg-slate-800/90 border border-slate-700 rounded-xl text-white placeholder-slate-500 text-xs focus:outline-none focus:border-cyan-500"
+                        required={role === 'customer'}
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2.5">
+                      <div>
+                        <label className="font-semibold text-slate-300 block mb-1">Current 5-Gal Jugs Held:</label>
+                        <input
+                          type="number"
+                          min="0"
+                          max="20"
+                          value={containersHeld}
+                          onChange={(e) => setContainersHeld(e.target.value)}
+                          className="w-full px-3 py-2 bg-slate-800/90 border border-slate-700 rounded-xl text-white text-xs focus:outline-none focus:border-cyan-500 font-mono"
+                          placeholder="0"
+                        />
+                        <span className="text-[10px] text-slate-400 mt-0.5 block">Empty jugs ready for swap</span>
+                      </div>
+
+                      <div>
+                        <label className="font-semibold text-slate-300 block mb-1">Landmark / Delivery Note:</label>
+                        <input
+                          type="text"
+                          placeholder="e.g. Blue gate, beside chapel"
+                          value={deliveryNotes}
+                          onChange={(e) => setDeliveryNotes(e.target.value)}
+                          className="w-full px-3 py-2 bg-slate-800/90 border border-slate-700 rounded-xl text-white placeholder-slate-500 text-xs focus:outline-none focus:border-cyan-500"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 <div className="flex items-center gap-2 pt-1">
                   <input

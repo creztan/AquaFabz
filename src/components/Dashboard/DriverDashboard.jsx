@@ -14,7 +14,7 @@ import {
   AlertCircle,
   LogOut,
 } from 'lucide-react';
-import { DeliveryMap } from '../Map/DeliveryMap';
+import { DeliveryMap, calculateDistanceKm, estimateDriveMinutes } from '../Map/DeliveryMap';
 
 export const DriverDashboard = ({ onNavigate }) => {
   const {
@@ -136,33 +136,49 @@ export const DriverDashboard = ({ onNavigate }) => {
                 🎉 No active delivery trips assigned right now. All orders delivered!
               </div>
             ) : (
-              activeOrders.map((ord) => (
-                <div
-                  key={ord.id}
-                  onClick={() => setSelectedOrder(ord)}
-                  className={`p-4 rounded-2xl border transition-all space-y-3 cursor-pointer ${
-                    selectedOrder?.id === ord.id
-                      ? 'border-indigo-500 bg-indigo-50/40 shadow-sm ring-1 ring-indigo-500'
-                      : 'border-slate-200 bg-slate-50/60 hover:bg-white'
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="font-mono font-bold text-xs text-indigo-700 bg-indigo-50 px-2.5 py-0.5 rounded-md border border-indigo-100">
-                      {ord.orderNumber}
-                    </span>
-                    <span
-                      className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
-                        ord.status === 'Out for Delivery'
-                          ? 'bg-indigo-600 text-white'
-                          : 'bg-amber-100 text-amber-800'
-                      }`}
-                    >
-                      {ord.status}
-                    </span>
-                  </div>
+              activeOrders.map((ord, idx) => {
+                const distKm = calculateDistanceKm(
+                  settings.coordinates.lat,
+                  settings.coordinates.lng,
+                  ord.coordinates.lat,
+                  ord.coordinates.lng
+                );
 
-                  <div>
-                    <h4 className="font-black text-slate-900 text-sm">{ord.customerName}</h4>
+                return (
+                  <div
+                    key={ord.id}
+                    onClick={() => setSelectedOrder(ord)}
+                    className={`p-4 rounded-2xl border transition-all space-y-3 cursor-pointer ${
+                      selectedOrder?.id === ord.id
+                        ? 'border-indigo-500 bg-indigo-50/40 shadow-sm ring-1 ring-indigo-500'
+                        : 'border-slate-200 bg-slate-50/60 hover:bg-white'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="w-5 h-5 rounded-full bg-slate-900 text-white font-black text-[10px] flex items-center justify-center">
+                          #{idx + 1}
+                        </span>
+                        <span className="font-mono font-bold text-xs text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-100">
+                          {ord.orderNumber}
+                        </span>
+                        <span className="text-[11px] text-slate-500 font-medium">
+                          {distKm} km (~{estimateDriveMinutes(distKm)}m)
+                        </span>
+                      </div>
+                      <span
+                        className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
+                          ord.status === 'Out for Delivery'
+                            ? 'bg-indigo-600 text-white'
+                            : 'bg-amber-100 text-amber-800'
+                        }`}
+                      >
+                        {ord.status}
+                      </span>
+                    </div>
+
+                    <div>
+                      <h4 className="font-black text-slate-900 text-sm">{ord.customerName}</h4>
                     <p className="text-xs text-slate-700 mt-1 flex items-start gap-1 font-medium">
                       <MapPin className="w-4 h-4 text-indigo-600 shrink-0 mt-0.5" />
                       <span>{ord.deliveryAddress} ({ord.barangay})</span>
@@ -228,9 +244,10 @@ export const DriverDashboard = ({ onNavigate }) => {
                     </button>
                   </div>
                 </div>
-              ))
-            )}
-          </div>
+              );
+            })
+          )}
+        </div>
         </div>
 
         {/* Interactive Driver Route Map (Right 5 Cols) */}
@@ -252,6 +269,7 @@ export const DriverDashboard = ({ onNavigate }) => {
             heightClass="h-[440px]"
             showVendingMachines={false}
             showAllCustomers={false}
+            onUpdateStatus={(id, status) => updateOrderStatus(id, status)}
           />
         </div>
       </div>

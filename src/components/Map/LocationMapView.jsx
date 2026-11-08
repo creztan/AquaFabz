@@ -95,6 +95,7 @@ export const LocationMapView = () => {
             heightClass="h-[620px]"
             showVendingMachines={true}
             showAllCustomers={true}
+            onUpdateStatus={(id, status) => updateOrderStatus(id, status)}
           />
         </div>
 

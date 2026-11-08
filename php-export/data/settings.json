@@ -1,0 +1,22 @@
+{
+  "stationName": "AquaFabz Water Refilling Station",
+  "tagline": "Pure, Safe & Alkaline Refreshment - 16-Stage Filtration System",
+  "branchName": "AquaFabz Main Station",
+  "address": "Brgy. Enclaro, Crossing Pag-Asa",
+  "barangay": "Brgy. Enclaro",
+  "city": "Binalbagan",
+  "province": "Negros Occidental",
+  "coordinates": {
+    "lat": 10.2014,
+    "lng": 122.8601
+  },
+  "contactNumber": "+63 (034) 388-8291 / 0917-555-9281",
+  "email": "contact@aquaflow-binalbagan.com",
+  "businessPermitNo": "BP-2026-0814-BNL",
+  "dohAccreditationNo": "DOH-R06-WRS-9921",
+  "currencySymbol": "₱",
+  "defaultDeliveryFee": 15,
+  "defaultContainerDeposit": 200,
+  "taxRatePercent": 0,
+  "waterSourceDescription": "Deep Well Water with 16-Stage Reverse Osmosis, Mineral Infusion & UV Sanitization"
+}

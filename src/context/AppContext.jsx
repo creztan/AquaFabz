@@ -166,21 +166,35 @@ export const AppProvider = ({ children }) => {
     setActivityLogs((prev) => [newLog, ...prev]);
   };
 
-  const login = (username, password) => {
-    const trimmedUser = username.trim().toLowerCase();
-    const user = users.find((u) => u.username.toLowerCase() === trimmedUser);
+  const login = (identifier, password) => {
+    if (!identifier || !identifier.trim()) {
+      return { success: false, message: 'Please enter your username, email, or contact number.' };
+    }
+    if (!password) {
+      return { success: false, message: 'Please enter your account password.' };
+    }
+
+    const trimmed = identifier.trim().toLowerCase();
+    const cleanNumber = identifier.replace(/[^0-9]/g, '');
+
+    const user = users.find(
+      (u) =>
+        u.username.toLowerCase() === trimmed ||
+        (u.email && u.email.toLowerCase() === trimmed) ||
+        (cleanNumber.length >= 7 && u.phone && u.phone.replace(/[^0-9]/g, '') === cleanNumber)
+    );
 
     if (!user) {
-      return { success: false, message: 'Username not found. Please register or check your spelling.' };
+      return { success: false, message: 'Account not found. Please verify your username, email, or contact number.' };
     }
 
     if (user.status === 'inactive') {
-      return { success: false, message: 'This staff account has been deactivated. Please contact the administrator.' };
+      return { success: false, message: 'This account has been deactivated. Please contact station management.' };
     }
 
     const expectedPassword = user.password || 'password123';
     if (password !== expectedPassword) {
-      return { success: false, message: 'Incorrect password. (Default is password123)' };
+      return { success: false, message: 'Incorrect password. Please check your credentials.' };
     }
 
     setCurrentUserId(user.id);
@@ -191,42 +205,81 @@ export const AppProvider = ({ children }) => {
     return { success: true };
   };
 
-  const loginAsCustomer = (customerIdOrPhone) => {
-    const query = customerIdOrPhone.trim().toLowerCase();
-    const customer = customers.find(
-      (c) =>
-        c.id === query ||
-        c.contactNumber.replace(/[^0-9]/g, '').includes(query.replace(/[^0-9]/g, '')) ||
-        c.name.toLowerCase().includes(query)
-    );
-
-    if (!customer) {
-      return { success: false, message: 'Customer account not found. Please verify name or contact number.' };
+  const loginAsCustomer = (identifier, password) => {
+    if (!identifier || !identifier.trim()) {
+      return { success: false, message: 'Please enter your customer username, email, or mobile number.' };
+    }
+    if (!password) {
+      return { success: false, message: 'Please enter your customer password to protect account security.' };
     }
 
-    const customerUserId = `cust-${customer.id}`;
-    let custUser = users.find((u) => u.id === customerUserId);
+    const query = identifier.trim().toLowerCase();
+    const cleanQuery = identifier.replace(/[^0-9]/g, '');
 
+    // 1. Look for existing customer user record in users
+    let custUser = users.find(
+      (u) =>
+        u.role === 'customer' &&
+        (u.username.toLowerCase() === query ||
+          (u.email && u.email.toLowerCase() === query) ||
+          (cleanQuery.length >= 7 && u.phone && u.phone.replace(/[^0-9]/g, '') === cleanQuery))
+    );
+
+    // 2. If not found in users, look in customers list
     if (!custUser) {
-      custUser = {
-        id: customerUserId,
-        name: customer.name,
-        username: customer.contactNumber.replace(/[^0-9]/g, '') || `customer_${customer.id}`,
-        role: 'customer',
-        email: customer.email || '',
-        phone: customer.contactNumber,
-        status: 'active',
-        avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
-        lastLogin: new Date().toLocaleString('en-US', { dateStyle: 'short', timeStyle: 'short' }),
+      const customer = customers.find(
+        (c) =>
+          c.id.toLowerCase() === query ||
+          (c.email && c.email.toLowerCase() === query) ||
+          (cleanQuery.length >= 7 && c.contactNumber && c.contactNumber.replace(/[^0-9]/g, '') === cleanQuery) ||
+          c.name.toLowerCase() === query
+      );
+
+      if (!customer) {
+        return {
+          success: false,
+          message: 'No registered customer account matches that username, email, or mobile number. Please sign up or verify spelling.',
+        };
+      }
+
+      // Check if user already exists for this customer ID
+      custUser = users.find((u) => u.customerId === customer.id || u.id === `usr-${customer.id}` || u.id === `cust-${customer.id}`);
+
+      if (!custUser) {
+        custUser = {
+          id: `usr-${customer.id}`,
+          customerId: customer.id,
+          name: customer.name,
+          username: customer.email ? customer.email.split('@')[0] : `cust_${customer.id}`,
+          password: 'password123',
+          role: 'customer',
+          email: customer.email || '',
+          phone: customer.contactNumber,
+          status: 'active',
+          avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
+          lastLogin: new Date().toLocaleString('en-US', { dateStyle: 'short', timeStyle: 'short' }),
+        };
+        setUsers((prev) => [...prev, custUser]);
+      }
+    }
+
+    if (custUser.status === 'inactive') {
+      return { success: false, message: 'This customer account is currently inactive. Please contact station staff.' };
+    }
+
+    const expectedPassword = custUser.password || 'password123';
+    if (password !== expectedPassword) {
+      return {
+        success: false,
+        message: 'Incorrect password for this customer account. Password verification is required to prevent unauthorized refill orders.',
       };
-      setUsers((prev) => [...prev, custUser]);
     }
 
     setCurrentUserId(custUser.id);
     setIsAuthenticated(true);
     localStorage.setItem('aquaflow_is_authenticated', 'true');
     localStorage.setItem(STORAGE_KEYS.CURRENT_USER_ID, custUser.id);
-    logActivity('Customer Signed In', `${customer.name} (Client Portal) accessed water account`, 'customer');
+    logActivity('Customer Signed In', `${custUser.name} authenticated into customer portal`, 'customer');
     return { success: true };
   };
 
@@ -238,9 +291,39 @@ export const AppProvider = ({ children }) => {
       return { success: false, message: 'Username is already taken. Please choose another username.' };
     }
 
+    const newUserId = `usr-${Date.now()}`;
+    let newCustomerId = null;
+
+    if (userData.role === 'customer') {
+      const newCust = {
+        id: `cust-${Date.now()}`,
+        name: userData.name,
+        contactNumber: userData.phone || '0912-345-6789',
+        email: userData.email || '',
+        customerType: userData.customerType || 'Residential',
+        primaryAddress: userData.address || 'Brgy. Enclaro, Crossing Pag-Asa',
+        barangay: userData.barangay || 'Brgy. Enclaro',
+        city: 'Binalbagan',
+        deliveryNotes: userData.deliveryNotes || '',
+        containersHeld: parseInt(userData.containersHeld || 0, 10),
+        totalOrders: 0,
+        totalSpent: 0,
+        registeredDate: new Date().toISOString().split('T')[0],
+        status: 'active',
+        coordinates: userData.coordinates || {
+          lat: settings.coordinates.lat + (Math.random() - 0.5) * 0.008,
+          lng: settings.coordinates.lng + (Math.random() - 0.5) * 0.008,
+        },
+      };
+      newCustomerId = newCust.id;
+      setCustomers((prev) => [newCust, ...prev]);
+      logActivity('Customer Profile Created', `Registered new client profile for ${newCust.name} (${newCust.barangay})`, 'customer');
+    }
+
     const newUser = {
       ...userData,
-      id: `usr-${Date.now()}`,
+      id: newUserId,
+      customerId: newCustomerId,
       status: 'active',
       password: userData.password || 'password123',
       lastLogin: new Date().toLocaleString('en-US', { dateStyle: 'short', timeStyle: 'short' }),

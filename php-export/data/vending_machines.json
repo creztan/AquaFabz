@@ -1,0 +1,50 @@
+[
+  {
+    "id": 1,
+    "machine_id": "vm-01",
+    "code": "AQUAVEND-01",
+    "name": "Binalbagan Public Market Unit A",
+    "location_name": "Public Market Entrance",
+    "barangay": "Brgy. Sto. Rosario",
+    "status": "operational",
+    "current_coin_total": 420.00,
+    "total_lifetime_sales": 18450.00,
+    "current_water_level_liters": 480,
+    "water_capacity_liters": 600,
+    "price_per_liter": 1.00,
+    "lat": 10.2035,
+    "lng": 122.8622
+  },
+  {
+    "id": 2,
+    "machine_id": "vm-02",
+    "code": "AQUAVEND-02",
+    "name": "Crossing Pag-Asa Junction Unit",
+    "location_name": "Near Tricycle Terminal",
+    "barangay": "Brgy. Enclaro",
+    "status": "operational",
+    "current_coin_total": 310.00,
+    "total_lifetime_sales": 14200.00,
+    "current_water_level_liters": 350,
+    "water_capacity_liters": 500,
+    "price_per_liter": 1.00,
+    "lat": 10.2001,
+    "lng": 122.8580
+  },
+  {
+    "id": 3,
+    "machine_id": "vm-03",
+    "code": "AQUAVEND-03",
+    "name": "Biscom Sugar Mill Gate Terminal",
+    "location_name": "Mill Worker Gate 2",
+    "barangay": "Brgy. San Jose",
+    "status": "low_water",
+    "current_coin_total": 195.00,
+    "total_lifetime_sales": 9800.00,
+    "current_water_level_liters": 120,
+    "water_capacity_liters": 500,
+    "price_per_liter": 1.00,
+    "lat": 10.1982,
+    "lng": 122.8645
+  }
+]

@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AquaFabz - Water Refilling Station & Delivery Management System (Frontend Only)</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Free Leaflet Map (Zero External APIs) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col antialiased">
+
+  <!-- Top Header Navigation (No Backend Required) -->
+  <header class="border-b border-slate-800 bg-slate-950/90 backdrop-blur-md sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3 cursor-pointer" onclick="switchTab('dashboard')">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-cyan-500 to-blue-600 text-white flex items-center justify-center font-bold shadow-lg shadow-cyan-500/20">
+          <i class="fa-solid fa-droplet"></i>
+        </div>
+        <div>
+          <span class="font-black text-white text-base tracking-tight">AquaFabz</span>
+          <span class="text-xs text-cyan-400 font-medium ml-1">Client Frontend</span>
+          <p class="text-[10px] text-slate-400">Pure HTML, CSS, JS, JSON · Zero Backend</p>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <nav class="hidden md:flex items-center gap-1.5 text-xs font-semibold">
+        <button type="button" onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-btn px-3 py-1.5 rounded-lg bg-cyan-600 text-white transition-colors">
+          <i class="fa-solid fa-chart-pie mr-1"></i> Dashboard
+        </button>
+        <button type="button" onclick="switchTab('pos')" id="nav-pos" class="nav-btn px-3 py-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-900 transition-colors">
+          <i class="fa-solid fa-cash-register mr-1 text-emerald-400"></i> POS Counter
+        </button>
+        <button type="button" onclick="switchTab('deliveries')" id="nav-deliveries" class="nav-btn px-3 py-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-900 transition-colors">
+          <i class="fa-solid fa-truck mr-1 text-indigo-400"></i> Deliveries & Map
+        </button>
+        <button type="button" onclick="switchTab('vending')" id="nav-vending" class="nav-btn px-3 py-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-900 transition-colors">
+          <i class="fa-solid fa-store mr-1 text-purple-400"></i> Vending Fleet
+        </button>
+        <button type="button" onclick="switchTab('containers')" id="nav-containers" class="nav-btn px-3 py-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-900 transition-colors">
+          <i class="fa-solid fa-box-archive mr-1 text-blue-400"></i> Containers
+        </button>
+      </nav>
+
+      <!-- Role Badge & Switcher (Frontend Simulation) -->
+      <div class="flex items-center gap-2 text-xs">
+        <span class="text-[11px] text-slate-400 hidden sm:inline">Role:</span>
+        <select id="roleSelector" onchange="changeRole(this.value)" class="bg-slate-900 border border-slate-700 text-cyan-400 rounded-lg px-2.5 py-1 text-xs font-bold focus:outline-none">
+          <option value="admin">Administrator (Eugene)</option>
+          <option value="staff">Staff / Cashier (Chrysty)</option>
+          <option value="delivery">Delivery Rider (Jacob)</option>
+        </select>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main View Container -->
+  <main class="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6">
+
+    <!-- 1. DASHBOARD VIEW -->
+    <section id="view-dashboard" class="view-section space-y-6">
+      <div class="bg-gradient-to-r from-slate-900 via-slate-900 to-cyan-950 border border-slate-800 rounded-3xl p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <span class="text-xs text-cyan-400 font-bold uppercase tracking-wider block">AquaFabz Station Overview</span>
+          <h1 class="text-2xl font-black text-white" id="welcomeHeading">Welcome, Administrator</h1>
+          <p class="text-xs text-slate-400 mt-1">Brgy. Enclaro, Crossing Pag-Asa, Binalbagan · 100% Client-Side JSON Data</p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2">
+          <button onclick="switchTab('pos')" class="px-3.5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold shadow-md flex items-center gap-1.5 cursor-pointer">
+            <i class="fa-solid fa-cash-register"></i> Open POS Counter
+          </button>
+          <button onclick="switchTab('deliveries')" class="px-3.5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold shadow-md flex items-center gap-1.5 cursor-pointer">
+            <i class="fa-solid fa-truck"></i> Driver Route Map
+          </button>
+        </div>
+      </div>
+
+      <!-- KPI Summary Cards -->
+      <div class="grid grid-cols-1 sm:grid-cols-4 gap-4 text-xs">
+        <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl">
+          <span class="text-slate-400 font-medium block">Station Products</span>
+          <span class="text-2xl font-black text-white block mt-1" id="kpiProducts">8</span>
+          <span class="text-[10px] text-cyan-400 mt-1 block">Purified, Mineral, Alkaline</span>
+        </div>
+
+        <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl">
+          <span class="text-slate-400 font-medium block">Active Delivery Trips</span>
+          <span class="text-2xl font-black text-indigo-400 block mt-1" id="kpiDeliveries">2</span>
+          <span class="text-[10px] text-indigo-300 mt-1 block">Assigned to driver queue</span>
+        </div>
+
+        <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl">
+          <span class="text-slate-400 font-medium block">Vending Machines</span>
+          <span class="text-2xl font-black text-purple-400 block mt-1" id="kpiVending">3</span>
+          <span class="text-[10px] text-purple-300 mt-1 block">24/7 Coin-Operated Units</span>
+        </div>
+
+        <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl">
+          <span class="text-slate-400 font-medium block">Containers in Circulation</span>
+          <span class="text-2xl font-black text-emerald-400 block mt-1" id="kpiContainers">17</span>
+          <span class="text-[10px] text-emerald-300 mt-1 block">Held by customers</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. POS COUNTER VIEW -->
+    <section id="view-pos" class="view-section hidden space-y-6">
+      <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <span class="text-xs text-emerald-400 font-bold uppercase tracking-wider block">Walk-In & Quick Sales Register</span>
+          <h2 class="text-2xl font-black text-white">Point of Sale (POS) Counter</h2>
+          <p class="text-xs text-slate-400 mt-0.5">Instant cash calculation, item removal from listing & printable receipt slip</p>
+        </div>
+
+        <div id="adminPosActions" class="flex items-center gap-2">
+          <button onclick="document.getElementById('posAddModal').classList.remove('hidden')" class="px-3.5 py-2 bg-cyan-600 hover:bg-cyan-500 text-white rounded-xl text-xs font-bold shadow-md flex items-center gap-1.5 cursor-pointer">
+            <i class="fa-solid fa-plus"></i> Add Item to Catalog
+          </button>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- Products Grid (7 Cols) -->
+        <div class="lg:col-span-7 bg-slate-900 border border-slate-800 rounded-3xl p-5 space-y-4">
+          <div class="flex items-center justify-between">
+            <h3 class="font-bold text-white text-sm flex items-center gap-2">
+              <i class="fa-solid fa-boxes-stacked text-cyan-400"></i>
+              <span>Water Refills & Supplies</span>
+            </h3>
+            <span class="text-xs text-slate-400 font-mono" id="posProductCount">Loading items...</span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="posProductList"></div>
+        </div>
+
+        <!-- Cart & Checkout Ticket (5 Cols) -->
+        <div class="lg:col-span-5 bg-slate-900 border border-slate-800 rounded-3xl p-5 space-y-4 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+              <h3 class="font-bold text-white text-sm flex items-center gap-2">
+                <i class="fa-solid fa-cart-shopping text-emerald-400"></i>
+                <span>Current Order Ticket</span>
+              </h3>
+              <button onclick="clearPosCart()" class="text-xs text-rose-400 hover:underline cursor-pointer">Clear</button>
+            </div>
+
+            <!-- Cart list with REMOVE button per line item -->
+            <div id="posCartContainer" class="divide-y divide-slate-800/80 my-3 max-h-[280px] overflow-y-auto space-y-2 pr-1"></div>
+          </div>
+
+          <!-- Checkout Controls -->
+          <div class="space-y-3 pt-3 border-t border-slate-800 text-xs">
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="text-slate-400 font-semibold block mb-1">Order Type:</label>
+                <select id="posOrderType" onchange="recalculatePosTotals()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white">
+                  <option value="walkin">Walk-In Counter</option>
+                  <option value="delivery">Home Delivery (+₱15)</option>
+                </select>
+              </div>
+              <div>
+                <label class="text-slate-400 font-semibold block mb-1">Customer Name:</label>
+                <input type="text" id="posCustomerName" placeholder="Walk-In Customer" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white">
+              </div>
+            </div>
+
+            <!-- Price Breakdown -->
+            <div class="p-3 bg-slate-950 rounded-2xl border border-slate-800 space-y-1 font-medium">
+              <div class="flex justify-between text-slate-400">
+                <span>Subtotal:</span>
+                <span id="posSubtotal">₱0.00</span>
+              </div>
+              <div class="flex justify-between text-slate-400">
+                <span>Delivery Fee:</span>
+                <span id="posDeliveryFee">₱0.00</span>
+              </div>
+              <div class="flex justify-between text-base font-black text-white pt-2 border-t border-slate-800">
+                <span>Total Amount:</span>
+                <span class="text-emerald-400 text-lg" id="posTotalAmount">₱0.00</span>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="text-slate-400 font-semibold block mb-1">Amount Tendered:</label>
+                <input type="number" id="posTendered" oninput="calculatePosChange()" placeholder="₱0.00" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-mono font-bold">
+              </div>
+              <div>
+                <label class="text-slate-400 font-semibold block mb-1">Change:</label>
+                <div id="posChange" class="w-full bg-slate-950/50 border border-slate-800 rounded-xl px-3 py-2 text-emerald-400 font-mono font-bold">₱0.00</div>
+              </div>
+            </div>
+
+            <button type="button" id="posCheckoutBtn" onclick="checkoutPosOrder()" disabled class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-800 disabled:text-slate-500 text-white font-bold rounded-2xl transition-all shadow-lg flex items-center justify-center gap-2 cursor-pointer">
+              <i class="fa-solid fa-check"></i> Complete Sale & Record Ticket
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. DELIVERIES & ZERO-API DRIVER MAP VIEW -->
+    <section id="view-deliveries" class="view-section hidden space-y-6">
+      <div class="bg-gradient-to-r from-indigo-950 via-slate-900 to-blue-950 border border-indigo-800/60 rounded-3xl p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <span class="text-xs text-indigo-400 font-bold uppercase tracking-wider block">Fleet Dispatch & Driver Map</span>
+          <h2 class="text-2xl font-black text-white">Delivery Route Queue & Driver Console</h2>
+          <p class="text-xs text-indigo-200 mt-1">Zero External APIs · Sequential Stop Badges · Browser GPS Tracking</p>
+        </div>
+
+        <div class="px-3.5 py-2 bg-indigo-900/60 border border-indigo-700/60 rounded-xl text-xs font-bold text-indigo-300">
+          <i class="fa-solid fa-motorcycle mr-1.5"></i> Driver Route & Handover
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- Delivery Cards List (6 Cols) -->
+        <div class="lg:col-span-6 bg-slate-900 border border-slate-800 rounded-3xl p-5 space-y-4">
+          <div class="flex items-center justify-between">
+            <h3 class="font-bold text-white text-sm flex items-center gap-2">
+              <i class="fa-solid fa-truck text-indigo-400"></i>
+              <span>Active Orders Queue</span>
+            </h3>
+            <span class="text-xs text-slate-400 font-mono" id="deliveryQueueCount">0 trips</span>
+          </div>
+
+          <div id="deliveryCardsContainer" class="space-y-3 max-h-[500px] overflow-y-auto pr-1"></div>
+        </div>
+
+        <!-- Zero-API Map Surface (6 Cols) -->
+        <div class="lg:col-span-6 bg-slate-900 border border-slate-800 rounded-3xl p-5 space-y-4">
+          <div class="flex items-center justify-between">
+            <h3 class="font-bold text-white text-sm flex items-center gap-2">
+              <i class="fa-solid fa-map-location-dot text-indigo-400"></i>
+              <span>Driver Map (Zero External APIs)</span>
+            </h3>
+            <button onclick="locateBrowserRider()" class="px-2.5 py-1 bg-slate-950 hover:bg-slate-800 text-emerald-400 border border-slate-800 rounded-lg text-xs font-bold flex items-center gap-1 cursor-pointer">
+              <i class="fa-solid fa-crosshairs"></i> Locate Me (GPS)
+            </button>
+          </div>
+
+          <div id="standaloneMap" class="w-full h-[460px] rounded-2xl overflow-hidden border border-slate-800 relative z-10"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. VENDING FLEET VIEW -->
+    <section id="view-vending" class="view-section hidden space-y-6">
+      <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <span class="text-xs text-purple-400 font-bold uppercase tracking-wider block">24/7 Coin-Operated Units</span>
+          <h2 class="text-2xl font-black text-white">Water Vending Machine Fleet</h2>
+          <p class="text-xs text-slate-400 mt-1">Manage machine availability, add/remove units, and monitor water levels</p>
+        </div>
+
+        <div id="adminVendingActions">
+          <button onclick="document.getElementById('vendingAddModal').classList.remove('hidden')" class="px-4 py-2.5 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-xs font-bold shadow-md flex items-center gap-2 cursor-pointer">
+            <i class="fa-solid fa-plus"></i> Add Vending Machine
+          </button>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" id="vendingFleetList"></div>
+    </section>
+
+    <!-- 5. CONTAINERS TRACKING VIEW -->
+    <section id="view-containers" class="view-section hidden space-y-6">
+      <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <span class="text-xs text-blue-400 font-bold uppercase tracking-wider block">Asset & Deposit Balance</span>
+          <h2 class="text-2xl font-black text-white">5-Gallon Container Audit Console</h2>
+          <p class="text-xs text-slate-400 mt-1">Audit jugs in customer possession, deposits held, and return compliance</p>
+        </div>
+      </div>
+
+      <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 space-y-4">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs">
+            <thead class="text-slate-400 uppercase text-[10px] bg-slate-950/80 border-b border-slate-800">
+              <tr>
+                <th class="py-3 px-4">Customer Name</th>
+                <th class="py-3 px-4">Barangay / Address</th>
+                <th class="py-3 px-4">Phone</th>
+                <th class="py-3 px-4 text-center">Containers Held</th>
+                <th class="py-3 px-4 text-right">Deposit Value</th>
+              </tr>
+            </thead>
+            <tbody id="containerTableBody" class="divide-y divide-slate-800/80 text-slate-300"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Modals -->
+  <!-- Add Product Modal -->
+  <div id="posAddModal" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 max-w-md w-full space-y-4">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+        <h3 class="font-bold text-white text-base">Add New Product to Catalog</h3>
+        <button onclick="document.getElementById('posAddModal').classList.add('hidden')" class="text-slate-400 hover:text-white cursor-pointer"><i class="fa-solid fa-xmark text-lg"></i></button>
+      </div>
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="text-slate-400 block mb-1">Item Code:</label>
+          <input type="text" id="newProdCode" placeholder="REF-MIN-5G" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white">
+        </div>
+        <div>
+          <label class="text-slate-400 block mb-1">Item Name:</label>
+          <input type="text" id="newProdName" placeholder="Mineral Water Refill 5-Gallon" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white">
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="text-slate-400 block mb-1">Price (₱):</label>
+            <input type="number" id="newProdPrice" value="30.00" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white">
+          </div>
+          <div>
+            <label class="text-slate-400 block mb-1">Stock:</label>
+            <input type="number" id="newProdStock" value="100" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white">
+          </div>
+        </div>
+        <button type="button" onclick="submitNewProduct()" class="w-full py-2.5 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-xl mt-2 cursor-pointer">Save Item</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Vending Machine Modal -->
+  <div id="vendingAddModal" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 max-w-md w-full space-y-4">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+        <h3 class="font-bold text-white text-base">Add Vending Machine</h3>
+        <button onclick="document.getElementById('vendingAddModal').classList.add('hidden')" class="text-slate-400 hover:text-white cursor-pointer"><i class="fa-solid fa-xmark text-lg"></i></button>
+      </div>
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="text-slate-400 block mb-1">Machine Code:</label>
+          <input type="text" id="newVmCode" placeholder="AQUAVEND-04" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white">
+        </div>
+        <div>
+          <label class="text-slate-400 block mb-1">Machine Name:</label>
+          <input type="text" id="newVmName" placeholder="Plaza Corner Unit" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white">
+        </div>
+        <div>
+          <label class="text-slate-400 block mb-1">Location Name:</label>
+          <input type="text" id="newVmLocation" placeholder="Near Public Park Entrance" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white">
+        </div>
+        <button type="button" onclick="submitNewVendingMachine()" class="w-full py-2.5 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-xl mt-2 cursor-pointer">Register Machine</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- New Delivery Order Modal -->
+  <div id="newDeliveryModal" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 max-w-md w-full space-y-4">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+        <h3 class="font-bold text-white text-base">Book New Delivery Drop-Off</h3>
+        <button onclick="document.getElementById('newDeliveryModal').classList.add('hidden')" class="text-slate-400 hover:text-white cursor-pointer"><i class="fa-solid fa-xmark text-lg"></i></button>
+      </div>
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="text-slate-400 block mb-1">Customer Name:</label>
+          <input type="text" id="newDelCustomerName" placeholder="Customer full name" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white">
+        </div>
+        <div>
+          <label class="text-slate-400 block mb-1">Phone Number:</label>
+          <input type="text" id="newDelPhone" placeholder="0918-123-4567" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white">
+        </div>
+        <div>
+          <label class="text-slate-400 block mb-1">Delivery Address:</label>
+          <input type="text" id="newDelAddress" placeholder="Purok 2, Brgy. Enclaro" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white">
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="text-slate-400 block mb-1">Refill Jugs (Qty):</label>
+            <input type="number" id="newDelQty" value="3" min="1" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white">
+          </div>
+          <div>
+            <label class="text-slate-400 block mb-1">Empty Jugs to Return:</label>
+            <input type="number" id="newDelEmpty" value="3" min="0" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white">
+          </div>
+        </div>
+        <button type="button" onclick="submitNewDelivery()" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl mt-2 cursor-pointer">Dispatch Delivery Order</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- JavaScript Client Core (Zero JSX, Zero Backend) -->
+  <script src="app.js"></script>
+</body>
+</html>
