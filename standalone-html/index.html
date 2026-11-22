@@ -582,12 +582,20 @@
     ];
 
     function loadData(key, fallback) {
-      const item = localStorage.getItem('aquafabz_single_' + key);
-      return item ? JSON.parse(item) : fallback;
+      try {
+        const item = localStorage.getItem('aquafabz_single_' + key);
+        if (!item) return fallback;
+        const parsed = JSON.parse(item);
+        return Array.isArray(fallback) ? (Array.isArray(parsed) ? parsed : fallback) : (parsed ?? fallback);
+      } catch (e) {
+        return fallback;
+      }
     }
 
     function saveData(key, data) {
-      localStorage.setItem('aquafabz_single_' + key, JSON.stringify(data));
+      try {
+        localStorage.setItem('aquafabz_single_' + key, JSON.stringify(data));
+      } catch (e) {}
     }
 
     let products = loadData('products', DEFAULT_PRODUCTS);

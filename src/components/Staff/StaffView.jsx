@@ -42,12 +42,12 @@ export const StaffView = () => {
 
   const openEditModal = (u) => {
     setEditingUserId(u.id);
-    setName(u.name);
-    setUsername(u.username);
-    setRole(u.role);
-    setEmail(u.email);
-    setPhone(u.phone);
-    setStatus(u.status);
+    setName(u.name || '');
+    setUsername(u.username || '');
+    setRole(u.role || 'staff');
+    setEmail(u.email || '');
+    setPhone(u.phone || '');
+    setStatus(u.status || 'active');
     setIsModalOpen(true);
   };
 
@@ -68,6 +68,7 @@ export const StaffView = () => {
       addUser({
         name,
         username,
+        password: 'password123',
         role,
         email,
         phone,
@@ -96,7 +97,7 @@ export const StaffView = () => {
           </p>
         </div>
 
-        {currentUser.role === 'admin' && (
+        {currentUser?.role === 'admin' && (
           <button
             type="button"
             onClick={openAddModal}
@@ -117,9 +118,9 @@ export const StaffView = () => {
             </span>
             <div className="text-sm font-bold text-white flex items-center gap-2 mt-0.5">
               <span>Currently Operating As:</span>
-              <span className="text-cyan-300 font-black">{currentUser.name}</span>
+              <span className="text-cyan-300 font-black">{currentUser?.name || 'User'}</span>
               <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-cyan-400/20 text-cyan-200 uppercase">
-                {currentUser.role}
+                {currentUser?.role || 'staff'}
               </span>
             </div>
           </div>
@@ -130,7 +131,7 @@ export const StaffView = () => {
 
         <div className="flex flex-wrap gap-2 pt-1">
           {users.map((u) => {
-            const isCurrent = u.id === currentUser.id;
+            const isCurrent = u.id === currentUser?.id;
             return (
               <button
                 key={u.id}
@@ -142,11 +143,11 @@ export const StaffView = () => {
                     : 'bg-slate-800/80 hover:bg-slate-700 text-slate-300 border border-slate-700'
                 }`}
               >
-                <span>{u.name}</span>
+                <span>{u.name || u.username}</span>
                 <span className={`text-[10px] px-1.5 py-0.2 rounded font-bold uppercase ${
                   isCurrent ? 'bg-cyan-950/20 text-slate-900' : 'bg-slate-900 text-slate-400'
                 }`}>
-                  {u.role}
+                  {u.role || 'staff'}
                 </span>
               </button>
             );
@@ -157,11 +158,12 @@ export const StaffView = () => {
       {/* Staff Accounts Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {users.map((u) => {
-          const isCurrentUser = u.id === currentUser.id;
+          const isCurrentUser = u.id === currentUser?.id;
 
           let roleBg = 'bg-indigo-100 text-indigo-800';
           if (u.role === 'admin') roleBg = 'bg-cyan-100 text-cyan-800';
           if (u.role === 'delivery') roleBg = 'bg-emerald-100 text-emerald-800';
+          if (u.role === 'customer') roleBg = 'bg-blue-100 text-blue-800';
 
           return (
             <div
@@ -173,40 +175,41 @@ export const StaffView = () => {
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-cyan-600 to-indigo-600 text-white font-black text-sm flex items-center justify-center shadow">
-                    {u.name
+                    {(u.name || 'U')
                       .split(' ')
                       .map((n) => n[0])
+                      .filter(Boolean)
                       .slice(0, 2)
-                      .join('')}
+                      .join('') || 'U'}
                   </div>
                   <div>
-                    <h3 className="font-bold text-slate-900 text-sm">{u.name}</h3>
+                    <h3 className="font-bold text-slate-900 text-sm">{u.name || u.username}</h3>
                     <div className="text-[11px] text-slate-500">@{u.username}</div>
                   </div>
                 </div>
 
                 <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase ${roleBg}`}>
-                  {u.role}
+                  {u.role || 'staff'}
                 </span>
               </div>
 
               <div className="space-y-1.5 text-xs text-slate-600 bg-slate-50 p-3 rounded-xl">
                 <div>
                   <span className="font-semibold text-slate-700">Email: </span>
-                  <span>{u.email}</span>
+                  <span>{u.email || 'Not set'}</span>
                 </div>
                 <div>
                   <span className="font-semibold text-slate-700">Phone: </span>
-                  <span>{u.phone}</span>
+                  <span>{u.phone || 'Not set'}</span>
                 </div>
                 <div>
                   <span className="font-semibold text-slate-700">Status: </span>
                   <span
                     className={`font-bold ${
-                      u.status === 'active' ? 'text-emerald-600' : 'text-slate-400'
+                      (u.status || 'active') === 'active' ? 'text-emerald-600' : 'text-slate-400'
                     }`}
                   >
-                    {u.status.toUpperCase()}
+                    {(u.status || 'active').toUpperCase()}
                   </span>
                 </div>
               </div>
@@ -223,7 +226,7 @@ export const StaffView = () => {
                   <span>{isCurrentUser ? 'Active Session' : 'Switch to this User'}</span>
                 </button>
 
-                {currentUser.role === 'admin' && (
+                {currentUser?.role === 'admin' && (
                   <div className="flex items-center gap-1">
                     <button
                       type="button"

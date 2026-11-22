@@ -23,7 +23,7 @@ import { DeliveryMap } from '../Map/DeliveryMap';
 import { NewOrderModal } from './NewOrderModal';
 
 export const DeliveryView = () => {
-  const { orders, updateOrderStatus, setPrintableItem, settings, users, customers, currentUser } = useApp();
+  const { orders, updateOrderStatus, setPrintableItem, settings, users, customers, vendingMachines, currentUser } = useApp();
 
   const [viewMode, setViewMode] = useState('pipeline');
   const [searchTerm, setSearchTerm] = useState('');
@@ -225,7 +225,7 @@ export const DeliveryView = () => {
                           <div className="flex justify-between">
                             <span className="text-slate-500">Items:</span>
                             <span className="font-medium">
-                              {order.items.reduce((sum, i) => sum + i.quantity, 0)} units
+                              {(order.items || []).reduce((sum, i) => sum + (i.quantity || 0), 0)} units
                             </span>
                           </div>
                           <div className="flex justify-between">
@@ -361,6 +361,7 @@ export const DeliveryView = () => {
               settings={settings}
               orders={filteredOrders}
               customers={customers}
+              vendingMachines={vendingMachines}
               selectedOrderId={selectedOrder?.id}
               onSelectOrder={(ord) => setSelectedOrder(ord)}
               heightClass="h-[550px]"
@@ -510,15 +511,15 @@ export const DeliveryView = () => {
                     <div className="p-2.5 bg-slate-50 rounded-xl text-xs space-y-1">
                       <div className="flex justify-between font-semibold">
                         <span>Items:</span>
-                        <span>{order.items.map((i) => `${i.quantity}x ${i.productName}`).join(', ')}</span>
+                        <span>{(order.items || []).map((i) => `${i.quantity}x ${i.productName}`).join(', ')}</span>
                       </div>
                       <div className="flex justify-between text-indigo-700 font-bold">
                         <span>Empty Jugs to Collect:</span>
-                        <span>{order.containersToReturnCount} jugs</span>
+                        <span>{order.containersToReturnCount ?? 0} jugs</span>
                       </div>
                       <div className="flex justify-between font-black text-slate-900 text-sm pt-1 border-t border-slate-200">
                         <span>Collect Payment:</span>
-                        <span>₱{order.totalAmount} ({order.paymentMethod.toUpperCase()})</span>
+                        <span>₱{order.totalAmount ?? 0} ({(order.paymentMethod || 'cash').toUpperCase()})</span>
                       </div>
                     </div>
                   </div>

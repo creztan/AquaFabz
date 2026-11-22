@@ -38,9 +38,9 @@ export const StaffDashboard = ({
   const preparingOrders = orders.filter((o) => o.status === 'Preparing');
   const outForDelivery = orders.filter((o) => o.status === 'Out for Delivery');
 
-  const availableJugs = products.find((p) => p.category === 'container')?.stock || 120;
-  const lowStockSupplies = products.filter((p) => p.stock <= p.minStock);
-  const lowWaterVending = vendingMachines.filter((vm) => vm.currentWaterLevelLiters < 250);
+  const availableJugs = products.find((p) => p.category === 'container')?.stock ?? 0;
+  const lowStockSupplies = products.filter((p) => (p.stock ?? 0) <= (p.minStock ?? 0));
+  const lowWaterVending = vendingMachines.filter((vm) => (vm.currentWaterLevelLiters ?? 0) < 250);
 
   const todayStaffSales = sales.filter((s) => s.date === todayDateStr && !s.isVendingMachineConsolidated);
 
@@ -57,7 +57,7 @@ export const StaffDashboard = ({
             Staff Desk Dashboard
           </h1>
           <p className="text-xs text-slate-300">
-            Active Operator: <strong className="text-white">{currentUser.name}</strong> (Staff) · Station Walk-In POS, Order Fulfillment & Vending Logging
+            Active Operator: <strong className="text-white">{currentUser?.name || 'Staff'}</strong> (Staff) · Station Walk-In POS, Order Fulfillment & Vending Logging
           </p>
         </div>
 

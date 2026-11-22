@@ -23,13 +23,15 @@ export const CustomerPortalView = () => {
 
   const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
 
-  // Match customer record by ID or name
+  // Match customer record by customerId, stripped user prefix, name, or phone
   const customer =
     customers.find(
       (c) =>
-        c.id === currentUser.id.replace('cust-', '') ||
-        c.name.toLowerCase() === currentUser.name.toLowerCase() ||
-        c.contactNumber === currentUser.phone
+        (currentUser?.customerId && c.id === currentUser.customerId) ||
+        (currentUser?.id && c.id === currentUser.id.replace(/^usr-/, '').replace(/^cust-/, '')) ||
+        (currentUser?.id && c.id === currentUser.id.replace(/^usr-/, '')) ||
+        (c.name && currentUser?.name && c.name.toLowerCase() === currentUser.name.toLowerCase()) ||
+        (c.contactNumber && currentUser?.phone && c.contactNumber === currentUser.phone)
     ) || customers[0];
 
   const myOrders = orders.filter(
@@ -52,7 +54,7 @@ export const CustomerPortalView = () => {
             <span>Customer / Client Water Portal</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-            Hello, {customer?.name || currentUser.name}
+            Hello, {customer?.name || currentUser?.name || 'Valued Client'}
           </h1>
           <p className="text-xs text-slate-300 mt-1 max-w-xl">
             Track your live water refills, view borrowed container deposits, and request instant station deliveries.
@@ -89,7 +91,7 @@ export const CustomerPortalView = () => {
             {customer?.containersHeld || 0} containers
           </span>
           <span className="text-[11px] text-slate-400">
-            Deposit held: ₱{((customer?.containersHeld || 0) * settings.defaultContainerDeposit).toLocaleString()} (Refundable on return)
+            Deposit held: ₱{((customer?.containersHeld || 0) * (settings?.defaultContainerDeposit ?? 200)).toLocaleString()} (Refundable on return)
           </span>
         </div>
 
@@ -193,12 +195,12 @@ export const CustomerPortalView = () => {
                     </span>
                   </div>
                   <div className="text-slate-700">
-                    {ord.items.map((i) => `${i.quantity}x ${i.productName}`).join(', ')}
+                    {(ord.items || []).map((i) => `${i.quantity}x ${i.productName}`).join(', ')}
                   </div>
                   <div className="flex items-center justify-between pt-1 border-t border-slate-200 text-slate-500">
                     <span>Schedule: {ord.requestedSchedule}</span>
                     <div className="flex items-center gap-2">
-                      <span className="font-black text-slate-900 text-sm">₱{ord.totalAmount}</span>
+                      <span className="font-black text-slate-900 text-sm">₱{ord.totalAmount ?? 0}</span>
                       <button
                         type="button"
                         onClick={() => setPrintableItem({ type: 'order', data: ord })}
@@ -238,12 +240,12 @@ export const CustomerPortalView = () => {
                   <div>
                     <span className="font-mono font-bold text-slate-800">{sale.transactionNumber}</span>
                     <div className="text-slate-500 text-[11px] mt-0.5">
-                      {sale.date} • {sale.paymentMethod.toUpperCase()}
+                      {sale.date} • {(sale.paymentMethod || 'cash').toUpperCase()}
                     </div>
                   </div>
                   <div className="text-right">
                     <span className="font-black text-slate-900 block text-sm">
-                      ₱{sale.totalAmount.toLocaleString()}
+                      ₱{(sale.totalAmount ?? 0).toLocaleString()}
                     </span>
                     <button
                       type="button"

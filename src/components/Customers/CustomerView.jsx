@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext.jsx';
 import {
   Users,
@@ -48,10 +48,27 @@ export const CustomerView = () => {
   const [custAddress, setCustAddress] = useState('');
   const [custBarangay, setCustBarangay] = useState('Brgy. Enclaro');
   const [custContainers, setCustContainers] = useState('0');
-  const [custLat, setCustLat] = useState(settings.coordinates.lat);
-  const [custLng, setCustLng] = useState(settings.coordinates.lng);
+  const [custLat, setCustLat] = useState(settings?.coordinates?.lat ?? 10.2014);
+  const [custLng, setCustLng] = useState(settings?.coordinates?.lng ?? 122.8601);
   const [custNotes, setCustNotes] = useState('');
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
+
+  useEffect(() => {
+    if (customers.length === 0) {
+      setSelectedCustomer(null);
+      return;
+    }
+    if (!selectedCustomer) {
+      setSelectedCustomer(customers[0]);
+      return;
+    }
+    const updated = customers.find((c) => c.id === selectedCustomer.id);
+    if (updated && updated !== selectedCustomer) {
+      setSelectedCustomer(updated);
+    } else if (!updated) {
+      setSelectedCustomer(customers[0]);
+    }
+  }, [customers]);
 
   // Filter customers
   const filteredCustomers = customers.filter((c) => {
@@ -75,8 +92,8 @@ export const CustomerView = () => {
     setCustBarangay('Brgy. Enclaro');
     setCustContainers('0');
     // slight offset from station HQ
-    setCustLat(settings.coordinates.lat + (Math.random() - 0.5) * 0.01);
-    setCustLng(settings.coordinates.lng + (Math.random() - 0.5) * 0.01);
+    setCustLat((settings?.coordinates?.lat ?? 10.2014) + (Math.random() - 0.5) * 0.01);
+    setCustLng((settings?.coordinates?.lng ?? 122.8601) + (Math.random() - 0.5) * 0.01);
     setCustNotes('');
     setIsAddEditModalOpen(true);
   };
@@ -266,7 +283,7 @@ export const CustomerView = () => {
                     </p>
                     <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-100 text-[10px] text-slate-400">
                       <span>📞 {cust.contactNumber}</span>
-                      <span>Total Spent: ₱{cust.totalSpent.toLocaleString()}</span>
+                      <span>Total Spent: ₱{(cust.totalSpent ?? 0).toLocaleString()}</span>
                     </div>
                   </div>
                 );
@@ -344,17 +361,17 @@ export const CustomerView = () => {
                 <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
                   <span className="text-[10px] text-slate-500 block">Jugs Currently Borrowed:</span>
                   <span className="text-base font-black text-cyan-700 mt-0.5 block">
-                    {selectedCustomer.containersHeld} containers
+                    {selectedCustomer.containersHeld ?? 0} containers
                   </span>
                   <span className="text-[10px] text-slate-400">
-                    Deposit: ₱{(selectedCustomer.containersHeld * 200).toLocaleString()}
+                    Deposit: ₱{((selectedCustomer.containersHeld ?? 0) * (settings?.defaultContainerDeposit ?? 200)).toLocaleString()}
                   </span>
                 </div>
 
                 <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
                   <span className="text-[10px] text-slate-500 block">Total Lifetime Orders:</span>
                   <span className="text-base font-black text-slate-900 mt-0.5 block">
-                    {selectedCustomer.totalOrders} orders
+                    {selectedCustomer.totalOrders ?? 0} orders
                   </span>
                   <span className="text-[10px] text-slate-400">Station & deliveries</span>
                 </div>
@@ -362,7 +379,7 @@ export const CustomerView = () => {
                 <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
                   <span className="text-[10px] text-slate-500 block">Total Amount Spent:</span>
                   <span className="text-base font-black text-emerald-600 mt-0.5 block">
-                    ₱{selectedCustomer.totalSpent.toLocaleString()}
+                    ₱{(selectedCustomer.totalSpent ?? 0).toLocaleString()}
                   </span>
                   <span className="text-[10px] text-emerald-700 font-medium">Valued Account</span>
                 </div>
@@ -462,11 +479,11 @@ export const CustomerView = () => {
                               </span>
                             </div>
                             <div className="text-[11px] text-slate-500 mt-0.5">
-                              {ord.date} • {ord.items.map((i) => `${i.quantity}x ${i.productName}`).join(', ')}
+                              {ord.date} • {(ord.items || []).map((i) => `${i.quantity}x ${i.productName}`).join(', ')}
                             </div>
                           </div>
                           <div className="text-right">
-                            <span className="font-bold text-slate-900 block">₱{ord.totalAmount}</span>
+                            <span className="font-bold text-slate-900 block">₱{ord.totalAmount ?? 0}</span>
                             <button
                               type="button"
                               onClick={() => setPrintableItem({ type: 'order', data: ord })}
@@ -491,11 +508,11 @@ export const CustomerView = () => {
                               </span>
                             </div>
                             <div className="text-[11px] text-slate-500 mt-0.5">
-                              {sale.date} • {sale.items.length} item(s) • {sale.paymentMethod.toUpperCase()}
+                              {sale.date} • {(sale.items || []).length} item(s) • {(sale.paymentMethod || 'cash').toUpperCase()}
                             </div>
                           </div>
                           <div className="text-right">
-                            <span className="font-bold text-slate-900 block">₱{sale.totalAmount}</span>
+                            <span className="font-bold text-slate-900 block">₱{sale.totalAmount ?? 0}</span>
                             <button
                               type="button"
                               onClick={() => setPrintableItem({ type: 'receipt', data: sale })}

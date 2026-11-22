@@ -33,20 +33,22 @@ export const ReportsView = () => {
   const [timeframe, setTimeframe] = useState('daily');
 
   // Sales totals
-  const totalGrossSales = sales.reduce((sum, s) => sum + s.totalAmount, 0);
+  const totalGrossSales = sales.reduce((sum, s) => sum + (s.totalAmount ?? 0), 0);
   const vendingPortion = sales
     .filter((s) => s.isVendingMachineConsolidated)
-    .reduce((sum, s) => sum + s.totalAmount, 0);
+    .reduce((sum, s) => sum + (s.totalAmount ?? 0), 0);
   const counterPortion = totalGrossSales - vendingPortion;
 
   // Inventory valuation
-  const totalInventoryUnits = products.reduce((sum, p) => sum + p.stock, 0);
-  const totalInventoryCost = products.reduce((sum, p) => sum + p.stock * p.cost, 0);
-  const totalInventoryRetailValue = products.reduce((sum, p) => sum + p.stock * p.price, 0);
+  const totalInventoryUnits = products.reduce((sum, p) => sum + (p.stock ?? 0), 0);
+  const totalInventoryCost = products.reduce((sum, p) => sum + (p.stock ?? 0) * (p.cost ?? 0), 0);
+  const totalInventoryRetailValue = products.reduce((sum, p) => sum + (p.stock ?? 0) * (p.price ?? 0), 0);
 
   // Containers
   const totalBorrowedContainers = customers.reduce((sum, c) => sum + (c.containersHeld || 0), 0);
-  const totalDepositsHeld = totalBorrowedContainers * settings.defaultContainerDeposit;
+  const depositPerJug = settings?.defaultContainerDeposit ?? 200;
+  const totalDepositsHeld = totalBorrowedContainers * depositPerJug;
+  const stationReadyJugs = products.find((p) => p.category === 'container')?.stock ?? 0;
 
   // Deliveries
   const totalDeliveries = orders.filter((o) => o.orderType === 'delivery').length;
@@ -73,14 +75,14 @@ export const ReportsView = () => {
           { label: 'Total In-Stock Units', value: totalInventoryUnits },
           { label: 'Total Stock Cost Value', value: `₱${totalInventoryCost.toLocaleString()}` },
           { label: 'Potential Retail Valuation', value: `₱${totalInventoryRetailValue.toLocaleString()}` },
-          { label: 'Low-Stock Alerts', value: products.filter((p) => p.stock <= p.minStock).length },
+          { label: 'Low-Stock Alerts', value: products.filter((p) => (p.stock ?? 0) <= (p.minStock ?? 0)).length },
         ],
       };
     } else if (activeReport === 'containers') {
       reportData = {
         title: 'Water Container Custody & Audit Report',
         metrics: [
-          { label: 'Available Ready Jugs in Station', value: '185 units' },
+          { label: 'Available Ready Jugs in Station', value: `${stationReadyJugs} units` },
           { label: 'Jugs Held by Customers', value: `${totalBorrowedContainers} units` },
           { label: 'Total Security Deposits Held', value: `₱${totalDepositsHeld.toLocaleString()}` },
           { label: 'Damaged / Scrapped Jugs', value: containers.filter((c) => c.actionType === 'damaged').length },
@@ -91,9 +93,9 @@ export const ReportsView = () => {
         title: 'Vending Fleet Performance Report',
         metrics: [
           { label: 'Active 24/7 Vending Units', value: vendingMachines.length },
-          { label: 'Lifetime Vending Sales', value: `₱${vendingMachines.reduce((s, vm) => s + vm.totalLifetimeSales, 0).toLocaleString()}` },
-          { label: 'Total Water in Reserve Tanks', value: `${vendingMachines.reduce((s, vm) => s + vm.currentWaterLevelLiters, 0)} Liters` },
-          { label: 'Total Coin Box Holdings', value: `₱${vendingMachines.reduce((s, vm) => s + vm.currentCoinTotal, 0).toLocaleString()}` },
+          { label: 'Lifetime Vending Sales', value: `₱${vendingMachines.reduce((s, vm) => s + (vm.totalLifetimeSales ?? 0), 0).toLocaleString()}` },
+          { label: 'Total Water in Reserve Tanks', value: `${vendingMachines.reduce((s, vm) => s + (vm.currentWaterLevelLiters ?? 0), 0)} Liters` },
+          { label: 'Total Coin Box Holdings', value: `₱${vendingMachines.reduce((s, vm) => s + (vm.currentCoinTotal ?? 0), 0).toLocaleString()}` },
         ],
       };
     } else if (activeReport === 'compliance') {
@@ -238,10 +240,10 @@ export const ReportsView = () => {
                       <td className="py-2.5 px-3 font-mono font-bold">{s.transactionNumber}</td>
                       <td className="py-2.5 px-3 text-slate-500">{s.date} {s.time}</td>
                       <td className="py-2.5 px-3 font-semibold text-slate-800">{s.customerName}</td>
-                      <td className="py-2.5 px-3 uppercase text-slate-600">{s.paymentMethod}</td>
-                      <td className="py-2.5 px-3 text-slate-600">{s.staffName}</td>
+                      <td className="py-2.5 px-3 uppercase text-slate-600">{s.paymentMethod || 'cash'}</td>
+                      <td className="py-2.5 px-3 text-slate-600">{s.staffName || 'Station Staff'}</td>
                       <td className="py-2.5 px-3 text-right font-black text-slate-900">
-                        ₱{s.totalAmount.toLocaleString()}
+                        ₱{(s.totalAmount ?? 0).toLocaleString()}
                       </td>
                     </tr>
                   ))}
@@ -309,12 +311,12 @@ export const ReportsView = () => {
                     <tr key={p.id} className="hover:bg-slate-50/60 transition-colors">
                       <td className="py-2.5 px-3 font-mono font-bold text-cyan-700">{p.code}</td>
                       <td className="py-2.5 px-3 font-semibold text-slate-800">{p.name}</td>
-                      <td className="py-2.5 px-3 font-bold text-slate-900">{p.stock} {p.unit}</td>
-                      <td className="py-2.5 px-3 text-slate-600">₱{p.cost}</td>
-                      <td className="py-2.5 px-3 text-slate-800 font-semibold">₱{p.price}</td>
-                      <td className="py-2.5 px-3 text-slate-600">₱{(p.stock * p.cost).toLocaleString()}</td>
+                      <td className="py-2.5 px-3 font-bold text-slate-900">{p.stock ?? 0} {p.unit}</td>
+                      <td className="py-2.5 px-3 text-slate-600">₱{p.cost ?? 0}</td>
+                      <td className="py-2.5 px-3 text-slate-800 font-semibold">₱{p.price ?? 0}</td>
+                      <td className="py-2.5 px-3 text-slate-600">₱{((p.stock ?? 0) * (p.cost ?? 0)).toLocaleString()}</td>
                       <td className="py-2.5 px-3 text-right font-bold text-cyan-800">
-                        ₱{(p.stock * p.price).toLocaleString()}
+                        ₱{((p.stock ?? 0) * (p.price ?? 0)).toLocaleString()}
                       </td>
                     </tr>
                   ))}
@@ -354,7 +356,7 @@ export const ReportsView = () => {
                 Station Replacement Reserve
               </span>
               <span className="text-2xl font-black text-cyan-700 mt-1 block">
-                185 units
+                {stationReadyJugs} units
               </span>
               <span className="text-[11px] text-slate-400">Available in washing & filling bay</span>
             </div>
@@ -375,15 +377,15 @@ export const ReportsView = () => {
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {customers
-                    .filter((c) => c.containersHeld > 0)
+                    .filter((c) => (c.containersHeld ?? 0) > 0)
                     .map((c) => (
                       <tr key={c.id} className="hover:bg-slate-50/60 transition-colors">
                         <td className="py-2.5 px-3 font-bold text-slate-900">{c.name}</td>
                         <td className="py-2.5 px-3 text-slate-600">{c.barangay}</td>
                         <td className="py-2.5 px-3 text-slate-500">{c.contactNumber}</td>
-                        <td className="py-2.5 px-3 font-black text-indigo-700">{c.containersHeld} containers</td>
+                        <td className="py-2.5 px-3 font-black text-indigo-700">{c.containersHeld ?? 0} containers</td>
                         <td className="py-2.5 px-3 text-right font-bold text-slate-900">
-                          ₱{(c.containersHeld * settings.defaultContainerDeposit).toLocaleString()}
+                          ₱{((c.containersHeld ?? 0) * depositPerJug).toLocaleString()}
                         </td>
                       </tr>
                     ))}
@@ -420,13 +422,13 @@ export const ReportsView = () => {
                         <div className="text-[11px] text-slate-500">{vm.locationName}</div>
                       </td>
                       <td className="py-2.5 px-3 font-bold text-cyan-800">
-                        {vm.currentWaterLevelLiters}L / {vm.waterCapacityLiters}L
+                        {vm.currentWaterLevelLiters ?? 0}L / {vm.waterCapacityLiters ?? 500}L
                       </td>
                       <td className="py-2.5 px-3 font-bold text-emerald-600">
-                        ₱{vm.currentCoinTotal.toLocaleString()}
+                        ₱{(vm.currentCoinTotal ?? 0).toLocaleString()}
                       </td>
                       <td className="py-2.5 px-3 font-black text-slate-900">
-                        ₱{vm.totalLifetimeSales.toLocaleString()}
+                        ₱{(vm.totalLifetimeSales ?? 0).toLocaleString()}
                       </td>
                       <td className="py-2.5 px-3">
                         <span
@@ -504,7 +506,7 @@ export const ReportsView = () => {
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {[...customers]
-                  .sort((a, b) => b.totalSpent - a.totalSpent)
+                  .sort((a, b) => (b.totalSpent ?? 0) - (a.totalSpent ?? 0))
                   .map((c) => (
                     <tr key={c.id} className="hover:bg-slate-50/60 transition-colors">
                       <td className="py-2.5 px-3 font-bold text-slate-900">{c.name}</td>
@@ -514,9 +516,9 @@ export const ReportsView = () => {
                         </span>
                       </td>
                       <td className="py-2.5 px-3 text-slate-600">{c.primaryAddress}</td>
-                      <td className="py-2.5 px-3 font-bold text-slate-800">{c.totalOrders} orders</td>
+                      <td className="py-2.5 px-3 font-bold text-slate-800">{c.totalOrders ?? 0} orders</td>
                       <td className="py-2.5 px-3 text-right font-black text-emerald-600 text-sm">
-                        ₱{c.totalSpent.toLocaleString()}
+                        ₱{(c.totalSpent ?? 0).toLocaleString()}
                       </td>
                     </tr>
                   ))}

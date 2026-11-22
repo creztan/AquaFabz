@@ -101,7 +101,7 @@ const ReceiptContent = ({ sale, currency }) => (
     </div>
     <div className="text-[11px]">
       <div>Customer: <strong className="text-slate-900">{sale.customerName}</strong></div>
-      <div>Type: {sale.orderType.toUpperCase()} | Served By: {sale.staffName}</div>
+      <div>Type: {(sale.orderType || 'walkin').toUpperCase()} | Served By: {sale.staffName || 'Station Staff'}</div>
     </div>
 
     {/* Items */}
@@ -110,16 +110,16 @@ const ReceiptContent = ({ sale, currency }) => (
         <span>Item / Description</span>
         <span>Amount</span>
       </div>
-      {sale.items.map((item, idx) => (
+      {(sale.items || []).map((item, idx) => (
         <div key={idx} className="flex justify-between text-[11px]">
           <div>
             <div className="font-semibold text-slate-800">{item.productName}</div>
             <div className="text-[10px] text-slate-500">
-              {item.quantity} x {currency}{item.unitPrice.toFixed(2)}
+              {item.quantity ?? 0} x {currency}{(item.unitPrice ?? 0).toFixed(2)}
             </div>
           </div>
           <div className="font-semibold text-slate-900 self-center">
-            {currency}{item.total.toFixed(2)}
+            {currency}{(item.total ?? 0).toFixed(2)}
           </div>
         </div>
       ))}
@@ -129,41 +129,41 @@ const ReceiptContent = ({ sale, currency }) => (
     <div className="space-y-1 text-[11px]">
       <div className="flex justify-between">
         <span className="text-slate-600">Subtotal:</span>
-        <span>{currency}{sale.subtotal.toFixed(2)}</span>
+        <span>{currency}{(sale.subtotal ?? 0).toFixed(2)}</span>
       </div>
-      {sale.discount > 0 && (
+      {(sale.discount ?? 0) > 0 && (
         <div className="flex justify-between text-emerald-600">
           <span>Discount:</span>
-          <span>-{currency}{sale.discount.toFixed(2)}</span>
+          <span>-{currency}{(sale.discount ?? 0).toFixed(2)}</span>
         </div>
       )}
-      {sale.deliveryFee > 0 && (
+      {(sale.deliveryFee ?? 0) > 0 && (
         <div className="flex justify-between">
           <span className="text-slate-600">Delivery Fee:</span>
-          <span>{currency}{sale.deliveryFee.toFixed(2)}</span>
+          <span>{currency}{(sale.deliveryFee ?? 0).toFixed(2)}</span>
         </div>
       )}
-      {sale.containerDeposit > 0 && (
+      {(sale.containerDeposit ?? 0) > 0 && (
         <div className="flex justify-between text-indigo-600">
           <span>Container Deposit:</span>
-          <span>+{currency}{sale.containerDeposit.toFixed(2)}</span>
+          <span>+{currency}{(sale.containerDeposit ?? 0).toFixed(2)}</span>
         </div>
       )}
       <div className="flex justify-between font-bold text-sm border-t border-slate-300 pt-1 text-slate-900">
         <span>TOTAL AMOUNT:</span>
-        <span>{currency}{sale.totalAmount.toFixed(2)}</span>
+        <span>{currency}{(sale.totalAmount ?? 0).toFixed(2)}</span>
       </div>
       <div className="flex justify-between pt-1 text-slate-600">
         <span>Payment Method:</span>
-        <span className="uppercase font-semibold">{sale.paymentMethod}</span>
+        <span className="uppercase font-semibold">{sale.paymentMethod || 'cash'}</span>
       </div>
       <div className="flex justify-between text-slate-600">
         <span>Amount Tendered:</span>
-        <span>{currency}{sale.amountPaid.toFixed(2)}</span>
+        <span>{currency}{(sale.amountPaid ?? 0).toFixed(2)}</span>
       </div>
       <div className="flex justify-between font-semibold text-slate-800">
         <span>Change:</span>
-        <span>{currency}{sale.change.toFixed(2)}</span>
+        <span>{currency}{(sale.change ?? 0).toFixed(2)}</span>
       </div>
     </div>
 
@@ -196,10 +196,10 @@ const OrderSlipContent = ({ order, currency }) => (
     {/* Items */}
     <div className="border-t border-b border-dashed border-slate-300 py-2 space-y-1">
       <div className="font-bold text-[10px] text-slate-500 uppercase">Items for Delivery</div>
-      {order.items.map((item, idx) => (
+      {(order.items || []).map((item, idx) => (
         <div key={idx} className="flex justify-between text-[11px]">
-          <span>{item.quantity}x {item.productName}</span>
-          <span className="font-semibold">{currency}{item.total.toFixed(2)}</span>
+          <span>{item.quantity ?? 0}x {item.productName}</span>
+          <span className="font-semibold">{currency}{(item.total ?? 0).toFixed(2)}</span>
         </div>
       ))}
     </div>
@@ -207,19 +207,19 @@ const OrderSlipContent = ({ order, currency }) => (
     <div className="space-y-1 text-[11px]">
       <div className="flex justify-between">
         <span>Delivery Fee:</span>
-        <span>{currency}{order.deliveryFee.toFixed(2)}</span>
+        <span>{currency}{(order.deliveryFee ?? 0).toFixed(2)}</span>
       </div>
       <div className="flex justify-between font-bold text-sm text-slate-900 pt-1 border-t border-slate-200">
         <span>TOTAL PAYABLE:</span>
-        <span>{currency}{order.totalAmount.toFixed(2)}</span>
+        <span>{currency}{(order.totalAmount ?? 0).toFixed(2)}</span>
       </div>
       <div className="flex justify-between text-[10px] text-slate-600">
         <span>Payment Status:</span>
-        <span className="font-bold uppercase text-slate-800">{order.paymentStatus} ({order.paymentMethod})</span>
+        <span className="font-bold uppercase text-slate-800">{order.paymentStatus || 'pending'} ({order.paymentMethod || 'cash'})</span>
       </div>
       <div className="flex justify-between text-[10px] text-indigo-700 font-semibold pt-1">
         <span>Empty Jugs to Collect:</span>
-        <span>{order.containersToReturnCount} containers</span>
+        <span>{order.containersToReturnCount ?? 0} containers</span>
       </div>
     </div>
   </div>
@@ -242,7 +242,7 @@ const VendingCollectionContent = ({
     <div className="border-t border-b border-dashed border-slate-300 py-2 space-y-1.5 text-[11px]">
       <div className="flex justify-between">
         <span>Water Dispensed:</span>
-        <strong className="text-slate-800">{record.waterDispensedLiters} Liters</strong>
+        <strong className="text-slate-800">{record.waterDispensedLiters ?? 0} Liters</strong>
       </div>
       {record.meterReadingStart && record.meterReadingEnd && (
         <div className="flex justify-between text-[10px] text-slate-500">
@@ -258,7 +258,7 @@ const VendingCollectionContent = ({
       )}
       <div className="flex justify-between font-bold text-sm text-emerald-700 pt-1 border-t border-slate-200">
         <span>COINS COLLECTED:</span>
-        <span>{currency}{record.coinsCollected.toLocaleString()}</span>
+        <span>{currency}{(record.coinsCollected ?? 0).toLocaleString()}</span>
       </div>
     </div>
 

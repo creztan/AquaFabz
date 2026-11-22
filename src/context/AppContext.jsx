@@ -31,72 +31,68 @@ const STORAGE_KEYS = {
   IS_AUTHENTICATED: 'aquaflow_is_authenticated',
 };
 
+const safeParseStorage = (key, fallback) => {
+  try {
+    const saved = localStorage.getItem(key);
+    if (!saved) return fallback;
+    const parsed = JSON.parse(saved);
+    if (Array.isArray(fallback)) {
+      return Array.isArray(parsed) ? parsed : fallback;
+    }
+    if (fallback && typeof fallback === 'object') {
+      return parsed && typeof parsed === 'object' ? { ...fallback, ...parsed } : fallback;
+    }
+    return parsed ?? fallback;
+  } catch {
+    return fallback;
+  }
+};
+
 export const AppProvider = ({ children }) => {
-  const [users, setUsers] = useState(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.USERS);
-    return saved ? JSON.parse(saved) : initialUsers;
-  });
+  const [users, setUsers] = useState(() => safeParseStorage(STORAGE_KEYS.USERS, initialUsers));
 
   const [currentUserId, setCurrentUserId] = useState(() => {
-    return localStorage.getItem(STORAGE_KEYS.CURRENT_USER_ID) || 'usr-1';
+    try {
+      return localStorage.getItem(STORAGE_KEYS.CURRENT_USER_ID) || 'usr-1';
+    } catch {
+      return 'usr-1';
+    }
   });
 
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    const stored = localStorage.getItem('aquaflow_is_authenticated');
-    return stored === 'true';
+    try {
+      const stored = localStorage.getItem(STORAGE_KEYS.IS_AUTHENTICATED);
+      return stored === 'true';
+    } catch {
+      return false;
+    }
   });
 
   const currentUser = users.find((u) => u.id === currentUserId) || users[0] || initialUsers[0];
 
-  const [customers, setCustomers] = useState(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.CUSTOMERS);
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [customers, setCustomers] = useState(() => safeParseStorage(STORAGE_KEYS.CUSTOMERS, []));
 
-  const [products, setProducts] = useState(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.PRODUCTS);
-    return saved ? JSON.parse(saved) : initialProducts;
-  });
+  const [products, setProducts] = useState(() => safeParseStorage(STORAGE_KEYS.PRODUCTS, initialProducts));
 
-  const [vendingMachines, setVendingMachines] = useState(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.VENDING_MACHINES);
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [vendingMachines, setVendingMachines] = useState(() =>
+    safeParseStorage(STORAGE_KEYS.VENDING_MACHINES, [])
+  );
 
-  const [vendingSales, setVendingSales] = useState(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.VENDING_SALES);
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [vendingSales, setVendingSales] = useState(() => safeParseStorage(STORAGE_KEYS.VENDING_SALES, []));
 
-  const [orders, setOrders] = useState(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.ORDERS);
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [orders, setOrders] = useState(() => safeParseStorage(STORAGE_KEYS.ORDERS, []));
 
-  const [sales, setSales] = useState(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.SALES);
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [sales, setSales] = useState(() => safeParseStorage(STORAGE_KEYS.SALES, []));
 
-  const [containers, setContainers] = useState(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.CONTAINERS);
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [containers, setContainers] = useState(() => safeParseStorage(STORAGE_KEYS.CONTAINERS, []));
 
-  const [stockMovements, setStockMovements] = useState(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.STOCK_MOVEMENTS);
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [stockMovements, setStockMovements] = useState(() =>
+    safeParseStorage(STORAGE_KEYS.STOCK_MOVEMENTS, [])
+  );
 
-  const [activityLogs, setActivityLogs] = useState(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.ACTIVITY_LOGS);
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [activityLogs, setActivityLogs] = useState(() => safeParseStorage(STORAGE_KEYS.ACTIVITY_LOGS, []));
 
-  const [settings, setSettings] = useState(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.SETTINGS);
-    return saved ? JSON.parse(saved) : initialSettings;
-  });
+  const [settings, setSettings] = useState(() => safeParseStorage(STORAGE_KEYS.SETTINGS, initialSettings));
 
   const [printableItem, setPrintableItem] = useState(null);
 
@@ -156,9 +152,9 @@ export const AppProvider = ({ children }) => {
         dateStyle: 'medium',
         timeStyle: 'short',
       }),
-      userId: currentUser.id,
-      userName: currentUser.name,
-      userRole: currentUser.role,
+      userId: currentUser?.id || 'usr-1',
+      userName: currentUser?.name || 'System User',
+      userRole: currentUser?.role || 'staff',
       action,
       details,
       category,
@@ -311,8 +307,8 @@ export const AppProvider = ({ children }) => {
         registeredDate: new Date().toISOString().split('T')[0],
         status: 'active',
         coordinates: userData.coordinates || {
-          lat: settings.coordinates.lat + (Math.random() - 0.5) * 0.008,
-          lng: settings.coordinates.lng + (Math.random() - 0.5) * 0.008,
+          lat: (settings?.coordinates?.lat ?? 10.2014) + (Math.random() - 0.5) * 0.008,
+          lng: (settings?.coordinates?.lng ?? 122.8601) + (Math.random() - 0.5) * 0.008,
         },
       };
       newCustomerId = newCust.id;
@@ -334,12 +330,12 @@ export const AppProvider = ({ children }) => {
     setIsAuthenticated(true);
     localStorage.setItem('aquaflow_is_authenticated', 'true');
     localStorage.setItem(STORAGE_KEYS.CURRENT_USER_ID, newUser.id);
-    logActivity('User Registered', `${newUser.name} created account with role ${newUser.role.toUpperCase()}`, 'staff');
+    logActivity('User Registered', `${newUser.name} created account with role ${(newUser.role || 'customer').toUpperCase()}`, 'staff');
     return { success: true };
   };
 
   const logout = () => {
-    logActivity('User Logged Out', `${currentUser.name} signed out of system session`, 'system');
+    logActivity('User Logged Out', `${currentUser?.name || 'User'} signed out of system session`, 'system');
     setIsAuthenticated(false);
     localStorage.setItem('aquaflow_is_authenticated', 'false');
   };
@@ -447,10 +443,13 @@ export const AppProvider = ({ children }) => {
     setVendingMachines((prev) =>
       prev.map((vm) => {
         if (vm.id === recordData.machineId) {
-          const newLifetime = vm.totalLifetimeSales + recordData.coinsCollected;
-          let newWaterLevel = vm.currentWaterLevelLiters - recordData.waterDispensedLiters;
+          const coins = recordData.coinsCollected || 0;
+          const dispensed = recordData.waterDispensedLiters || 0;
+          const capacity = vm.waterCapacityLiters || 500;
+          const newLifetime = (vm.totalLifetimeSales || 0) + coins;
+          let newWaterLevel = (vm.currentWaterLevelLiters || 0) - dispensed;
           if (recordData.waterRefilledLiters) {
-            newWaterLevel = Math.min(vm.waterCapacityLiters, newWaterLevel + recordData.waterRefilledLiters);
+            newWaterLevel = Math.min(capacity, newWaterLevel + recordData.waterRefilledLiters);
           }
           const newStatus = newWaterLevel < 200 ? 'low_water' : 'operational';
           return {
@@ -467,6 +466,8 @@ export const AppProvider = ({ children }) => {
     );
 
     const now = new Date();
+    const collectedCoins = recordData.coinsCollected || 0;
+    const dispensedLiters = recordData.waterDispensedLiters || 0;
     const consTx = {
       id: `tx-vnd-${Date.now()}`,
       transactionNumber: `TX-VND-${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}-${Math.floor(100 + Math.random() * 900)}`,
@@ -477,20 +478,20 @@ export const AppProvider = ({ children }) => {
       items: [
         {
           productId: 'vending-water',
-          productName: `Vending Dispensed (${recordData.waterDispensedLiters} L)`,
-          quantity: recordData.waterDispensedLiters,
-          unitPrice: recordData.coinsCollected / (recordData.waterDispensedLiters || 1),
+          productName: `Vending Dispensed (${dispensedLiters} L)`,
+          quantity: dispensedLiters,
+          unitPrice: collectedCoins / (dispensedLiters || 1),
           unit: 'L',
           isWater: true,
-          total: recordData.coinsCollected,
+          total: collectedCoins,
         },
       ],
-      subtotal: recordData.coinsCollected,
+      subtotal: collectedCoins,
       discount: 0,
       deliveryFee: 0,
       containerDeposit: 0,
-      totalAmount: recordData.coinsCollected,
-      amountPaid: recordData.coinsCollected,
+      totalAmount: collectedCoins,
+      amountPaid: collectedCoins,
       change: 0,
       paymentMethod: 'cash',
       paymentStatus: 'paid',
@@ -503,7 +504,7 @@ export const AppProvider = ({ children }) => {
 
     logActivity(
       'Vending Machine Collection',
-      `Collected ₱${recordData.coinsCollected.toLocaleString()} from ${recordData.machineName} (${recordData.waterDispensedLiters}L dispensed)`,
+      `Collected ₱${collectedCoins.toLocaleString()} from ${recordData.machineName} (${dispensedLiters}L dispensed)`,
       'vending'
     );
   };
@@ -527,8 +528,8 @@ export const AppProvider = ({ children }) => {
           c.id === orderData.customerId
             ? {
                 ...c,
-                totalOrders: c.totalOrders + 1,
-                totalSpent: c.totalSpent + orderData.totalAmount,
+                totalOrders: (c.totalOrders || 0) + 1,
+                totalSpent: (c.totalSpent || 0) + (orderData.totalAmount || 0),
               }
             : c
         )
@@ -537,7 +538,7 @@ export const AppProvider = ({ children }) => {
 
     logActivity(
       'Order Created',
-      `Order ${orderNumber} created for ${orderData.customerName} (${orderData.orderType}) - ₱${orderData.totalAmount}`,
+      `Order ${orderNumber} created for ${orderData.customerName} (${orderData.orderType}) - ₱${orderData.totalAmount || 0}`,
       'delivery'
     );
     return newOrder;
@@ -579,8 +580,14 @@ export const AppProvider = ({ children }) => {
   const recordSale = (saleData) => {
     const now = new Date();
     const transactionNumber = `TX-${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}-${String(sales.length + 1).padStart(3, '0')}`;
+    const saleItems = Array.isArray(saleData.items) ? saleData.items : [];
+    const totalAmount = saleData.totalAmount || 0;
+    const paymentMethod = saleData.paymentMethod || 'cash';
     const newSale = {
       ...saleData,
+      items: saleItems,
+      totalAmount,
+      paymentMethod,
       id: `tx-${Date.now()}`,
       transactionNumber,
       date: now.toISOString().split('T')[0],
@@ -591,11 +598,11 @@ export const AppProvider = ({ children }) => {
 
     setProducts((prev) =>
       prev.map((p) => {
-        const purchasedQty = saleData.items
+        const purchasedQty = saleItems
           .filter((item) => item.productId === p.id)
-          .reduce((sum, item) => sum + item.quantity, 0);
+          .reduce((sum, item) => sum + (item.quantity || 0), 0);
         if (purchasedQty > 0) {
-          return { ...p, stock: Math.max(0, p.stock - purchasedQty) };
+          return { ...p, stock: Math.max(0, (p.stock || 0) - purchasedQty) };
         }
         return p;
       })
@@ -607,8 +614,8 @@ export const AppProvider = ({ children }) => {
           c.id === saleData.customerId
             ? {
                 ...c,
-                totalOrders: c.totalOrders + 1,
-                totalSpent: c.totalSpent + saleData.totalAmount,
+                totalOrders: (c.totalOrders || 0) + 1,
+                totalSpent: (c.totalSpent || 0) + totalAmount,
               }
             : c
         )
@@ -617,7 +624,7 @@ export const AppProvider = ({ children }) => {
 
     logActivity(
       'Sale Recorded',
-      `Sale ${transactionNumber} for ${saleData.customerName} - Total: ₱${saleData.totalAmount.toLocaleString()} (${saleData.paymentMethod.toUpperCase()})`,
+      `Sale ${transactionNumber} for ${saleData.customerName} - Total: ₱${totalAmount.toLocaleString()} (${paymentMethod.toUpperCase()})`,
       'sales'
     );
 
@@ -637,9 +644,9 @@ export const AppProvider = ({ children }) => {
         prev.map((c) => {
           if (c.id === recordData.customerId) {
             let change = 0;
-            if (recordData.actionType === 'borrow') change = recordData.quantity;
-            if (recordData.actionType === 'return') change = -recordData.quantity;
-            return { ...c, containersHeld: Math.max(0, c.containersHeld + change) };
+            if (recordData.actionType === 'borrow') change = recordData.quantity || 0;
+            if (recordData.actionType === 'return') change = -(recordData.quantity || 0);
+            return { ...c, containersHeld: Math.max(0, (c.containersHeld || 0) + change) };
           }
           return c;
         })
@@ -648,7 +655,7 @@ export const AppProvider = ({ children }) => {
 
     logActivity(
       'Container Tracked',
-      `${recordData.actionType.toUpperCase()}: ${recordData.quantity}x ${recordData.containerType} by ${recordData.customerName}`,
+      `${(recordData.actionType || 'borrow').toUpperCase()}: ${recordData.quantity}x ${recordData.containerType} by ${recordData.customerName}`,
       'container'
     );
   };
@@ -672,7 +679,7 @@ export const AppProvider = ({ children }) => {
 
     logActivity(
       'Inventory Stock Movement',
-      `${movementData.movementType.toUpperCase()}: ${movementData.productName} by ${movementData.quantity} (New stock: ${movementData.newStock})`,
+      `${(movementData.movementType || 'adjustment').toUpperCase()}: ${movementData.productName} by ${movementData.quantity} (New stock: ${movementData.newStock})`,
       'inventory'
     );
   };

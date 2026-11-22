@@ -59,12 +59,12 @@ export const AdminDashboard = ({
 
   // Containers & inventory
   const containerHeldByCustomers = customers.reduce((acc, c) => acc + (c.containersHeld || 0), 0);
-  const availableContainers = products.find((p) => p.category === 'container')?.stock || 120;
-  const lowStockProducts = products.filter((p) => p.stock <= p.minStock);
-  const lowWaterVending = vendingMachines.filter((vm) => vm.currentWaterLevelLiters < 250);
+  const availableContainers = products.find((p) => p.category === 'container')?.stock ?? 0;
+  const lowStockProducts = products.filter((p) => (p.stock ?? 0) <= (p.minStock ?? 0));
+  const lowWaterVending = vendingMachines.filter((vm) => (vm.currentWaterLevelLiters ?? 0) < 250);
 
-  const totalVendingCoinsInBoxes = vendingMachines.reduce((acc, vm) => acc + vm.currentCoinTotal, 0);
-  const totalVendingLifetime = vendingMachines.reduce((acc, vm) => acc + vm.totalLifetimeSales, 0);
+  const totalVendingCoinsInBoxes = vendingMachines.reduce((acc, vm) => acc + (vm.currentCoinTotal ?? 0), 0);
+  const totalVendingLifetime = vendingMachines.reduce((acc, vm) => acc + (vm.totalLifetimeSales ?? 0), 0);
 
   return (
     <div className="space-y-6">
@@ -76,10 +76,10 @@ export const AdminDashboard = ({
             <span>Administrator Portal Landing Console</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-            {settings.stationName} Master Executive Dashboard
+            {settings?.stationName || 'AquaFabz'} Master Executive Dashboard
           </h1>
           <p className="text-xs text-slate-300">
-            Administrator: <strong className="text-white">{currentUser.name}</strong> · Complete Financials, Vending Fleet, Staff Control & Station Audits
+            Administrator: <strong className="text-white">{currentUser?.name || 'Administrator'}</strong> · Complete Financials, Vending Fleet, Staff Control & Station Audits
           </p>
         </div>
 
@@ -226,7 +226,7 @@ export const AdminDashboard = ({
           <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
             <span>Customer Deposits</span>
             <span className="text-blue-700 font-bold font-mono">
-              ₱{(containerHeldByCustomers * 200).toLocaleString()}
+              ₱{(containerHeldByCustomers * (settings?.defaultContainerDeposit ?? 200)).toLocaleString()}
             </span>
           </div>
         </div>

@@ -45,12 +45,32 @@ export const NewOrderModal = ({ isOpen, onClose }) => {
   useEffect(() => {
     if (!isOpen) return;
     setFormError('');
-    setDeliveryFee(settings.defaultDeliveryFee);
+    setDeliveryFee(settings?.defaultDeliveryFee ?? 15);
+    const eligibleRiders = users.filter((u) => u.role === 'delivery' || u.role === 'staff' || u.role === 'admin');
+    if (eligibleRiders.length > 0 && !eligibleRiders.some((u) => u.name === assignedRider)) {
+      const preferred = eligibleRiders.find((u) => u.role === 'delivery') || eligibleRiders[0];
+      setAssignedRider(preferred.name);
+    }
+    if (cart.length === 0 && products.length > 0) {
+      setCart([
+        {
+          productId: products[0].id,
+          productName: products[0].name,
+          quantity: 5,
+          unitPrice: products[0].price,
+          unit: products[0].unit,
+          isWater: products[0].isWater,
+          requiresContainerSwap: products[0].requiresContainerSwap,
+          total: products[0].price * 5,
+        },
+      ]);
+    }
     if (currentUser?.role === 'customer') {
       const matched = customers.find(
         (c) =>
           c.id === currentUser.customerId ||
-          c.id === currentUser.id.replace('cust-', '') ||
+          c.id === currentUser.id?.replace(/^usr-/, '') ||
+          c.id === currentUser.id?.replace('cust-', '') ||
           c.name?.toLowerCase() === currentUser.name?.toLowerCase()
       );
       if (matched) {
@@ -65,7 +85,7 @@ export const NewOrderModal = ({ isOpen, onClose }) => {
     } else if (customers.length === 0) {
       setSelectedCustomerId('__manual__');
     }
-  }, [isOpen, customers, currentUser, settings.defaultDeliveryFee]);
+  }, [isOpen, customers, currentUser, settings?.defaultDeliveryFee, users, products]);
 
   if (!isOpen) return null;
 
