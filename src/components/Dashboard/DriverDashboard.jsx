@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext.jsx';
 import {
   Truck,
@@ -40,6 +40,19 @@ export const DriverDashboard = ({ onNavigate }) => {
   const totalJugsToCollect = activeOrders.reduce((sum, o) => sum + (o.containersToReturnCount || 0), 0);
 
   const [selectedOrder, setSelectedOrder] = useState(activeOrders[0] || null);
+
+  useEffect(() => {
+    if (activeOrders.length === 0) {
+      setSelectedOrder(null);
+    } else if (!selectedOrder || !activeOrders.some((o) => o.id === selectedOrder.id)) {
+      setSelectedOrder(activeOrders[0]);
+    } else {
+      const updated = activeOrders.find((o) => o.id === selectedOrder.id);
+      if (updated && updated !== selectedOrder) {
+        setSelectedOrder(updated);
+      }
+    }
+  }, [activeOrders, selectedOrder]);
 
   return (
     <div className="space-y-6">
@@ -138,10 +151,10 @@ export const DriverDashboard = ({ onNavigate }) => {
             ) : (
               activeOrders.map((ord, idx) => {
                 const distKm = calculateDistanceKm(
-                  settings.coordinates.lat,
-                  settings.coordinates.lng,
-                  ord.coordinates.lat,
-                  ord.coordinates.lng
+                  settings?.coordinates?.lat ?? 10.1585,
+                  settings?.coordinates?.lng ?? 122.8688,
+                  ord.coordinates?.lat,
+                  ord.coordinates?.lng
                 );
 
                 return (
@@ -202,7 +215,7 @@ export const DriverDashboard = ({ onNavigate }) => {
                     </div>
                     <div className="flex justify-between font-black text-slate-900 text-sm pt-1 border-t border-slate-100">
                       <span>Collect Payment:</span>
-                      <span>₱{ord.totalAmount} ({ord.paymentMethod.toUpperCase()})</span>
+                      <span>₱{ord.totalAmount} ({(ord.paymentMethod || 'cash').toUpperCase()})</span>
                     </div>
                   </div>
 

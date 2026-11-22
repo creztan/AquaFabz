@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext.jsx';
 import {
   Package,
@@ -36,6 +36,14 @@ export const InventoryView = () => {
 
   // Form states for stock movement
   const [selectedProductId, setSelectedProductId] = useState(products[0]?.id || '');
+
+  useEffect(() => {
+    if (products.length === 0) {
+      setSelectedProductId('');
+    } else if (!products.some((p) => p.id === selectedProductId)) {
+      setSelectedProductId(products[0].id);
+    }
+  }, [products, selectedProductId]);
   const [movementQty, setMovementQty] = useState(10);
   const [refNumber, setRefNumber] = useState('');
   const [supplierOrParty, setSupplierOrParty] = useState('');
@@ -56,8 +64,8 @@ export const InventoryView = () => {
   // Filter products
   const filteredProducts = products.filter((p) => {
     const matchesSearch =
-      p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      p.code.toLowerCase().includes(searchTerm.toLowerCase());
+      (p.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (p.code || '').toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCat = selectedCategory === 'all' || p.category === selectedCategory;
     return matchesSearch && matchesCat;
   });
@@ -318,10 +326,10 @@ export const InventoryView = () => {
                       <div className="text-[10px] text-slate-400">Min: {prod.minStock} {prod.unit}</div>
                     </td>
                     <td className="py-3 px-4 font-bold text-slate-900 text-sm">
-                      ₱{prod.price.toFixed(2)}
+                      ₱{(prod.price ?? 0).toFixed(2)}
                     </td>
                     <td className="py-3 px-4 text-slate-500">
-                      ₱{prod.cost.toFixed(2)}
+                      ₱{(prod.cost ?? 0).toFixed(2)}
                     </td>
                     <td className="py-3 px-4">
                       <span

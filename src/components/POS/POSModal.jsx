@@ -51,6 +51,7 @@ export const POSModal = ({ isOpen, onClose }) => {
   const [newProdPrice, setNewProdPrice] = useState(30);
   const [newProdStock, setNewProdStock] = useState(100);
   const [newProdUnit, setNewProdUnit] = useState('jug');
+  const [confirmDeleteProdId, setConfirmDeleteProdId] = useState(null);
 
   if (!isOpen) return null;
 
@@ -60,8 +61,8 @@ export const POSModal = ({ isOpen, onClose }) => {
   const filteredProducts = products.filter((p) => {
     const matchesCategory = categoryFilter === 'all' || p.category === categoryFilter;
     const matchesSearch =
-      p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      p.code.toLowerCase().includes(searchTerm.toLowerCase());
+      (p.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (p.code || '').toLowerCase().includes(searchTerm.toLowerCase());
     return matchesCategory && matchesSearch;
   });
 
@@ -122,10 +123,13 @@ export const POSModal = ({ isOpen, onClose }) => {
 
   // Admin delete product from station listing
   const handleDeleteCatalogProduct = (product) => {
-    if (window.confirm(`Are you sure you want to remove "${product.name}" (${product.code}) from the station listing?`)) {
-      if (deleteProduct) deleteProduct(product.id);
-      removeFromCart(product.id);
+    if (confirmDeleteProdId !== product.id) {
+      setConfirmDeleteProdId(product.id);
+      return;
     }
+    if (deleteProduct) deleteProduct(product.id);
+    removeFromCart(product.id);
+    setConfirmDeleteProdId(null);
   };
 
   // Admin add product to station listing
@@ -308,17 +312,36 @@ export const POSModal = ({ isOpen, onClose }) => {
                         <div className="flex items-center gap-1">
                           <span className="text-[10px] text-slate-400">Stock: {prod.stock}</span>
                           {currentUser?.role === 'admin' && (
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleDeleteCatalogProduct(prod);
-                              }}
-                              className="p-1 text-slate-300 hover:text-rose-600 hover:bg-rose-50 rounded transition-colors"
-                              title="Delete/Remove item from station catalog (Admin)"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
+                            confirmDeleteProdId === prod.id ? (
+                              <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeleteCatalogProduct(prod)}
+                                  className="px-1.5 py-0.5 bg-rose-600 text-white rounded text-[10px] font-bold cursor-pointer"
+                                >
+                                  Delete?
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => setConfirmDeleteProdId(null)}
+                                  className="px-1.5 py-0.5 bg-slate-200 text-slate-700 rounded text-[10px] font-semibold cursor-pointer"
+                                >
+                                  No
+                                </button>
+                              </div>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDeleteCatalogProduct(prod);
+                                }}
+                                className="p-1 text-slate-300 hover:text-rose-600 hover:bg-rose-50 rounded transition-colors cursor-pointer"
+                                title="Delete/Remove item from station catalog (Admin)"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            )
                           )}
                         </div>
                       </div>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext.jsx';
 import {
   Droplets,
@@ -23,14 +23,21 @@ import {
 } from 'lucide-react';
 
 export const LoginPage = ({
+  initialPortal = 'admin',
   onNavigateToRegister,
   onNavigateToLanding,
   onSuccess,
 }) => {
-  const { login, loginAsCustomer, customers, users } = useApp();
+  const { login, loginAsCustomer } = useApp();
 
   // Role Landing Portals: 'admin' | 'staff' | 'delivery' | 'customer'
-  const [selectedPortal, setSelectedPortal] = useState('admin');
+  const [selectedPortal, setSelectedPortal] = useState(initialPortal || 'admin');
+
+  useEffect(() => {
+    if (initialPortal) {
+      setSelectedPortal(initialPortal);
+    }
+  }, [initialPortal]);
 
   // Form States for Personnel
   const [username, setUsername] = useState('');
@@ -313,6 +320,13 @@ export const LoginPage = ({
                     className="w-full pl-10 pr-10 py-2.5 bg-slate-950/80 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-sky-500 text-xs"
                     required
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 p-1"
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
                 </div>
               </div>
 
@@ -331,39 +345,17 @@ export const LoginPage = ({
           {selectedPortal === 'delivery' && (
             <form onSubmit={handlePersonnelSubmit} className="space-y-4 text-xs">
               <div>
-                <label className="font-medium text-slate-300 block mb-1.5">Select Delivery Rider Account:</label>
-                <div className="grid grid-cols-2 gap-2 mb-3">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setUsername('jacob');
-                      setPassword('password123');
-                    }}
-                    className={`p-2.5 rounded-xl border text-left cursor-pointer ${
-                      username === 'jacob'
-                        ? 'bg-indigo-950 border-indigo-500 text-white font-bold'
-                        : 'bg-slate-950 border-slate-800 text-slate-400'
-                    }`}
-                  >
-                    <div>Christan Jacob M. Verde</div>
-                    <div className="text-[10px] text-indigo-400">Rider #1</div>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setUsername('ramon');
-                      setPassword('password123');
-                    }}
-                    className={`p-2.5 rounded-xl border text-left cursor-pointer ${
-                      username === 'ramon'
-                        ? 'bg-indigo-950 border-indigo-500 text-white font-bold'
-                        : 'bg-slate-950 border-slate-800 text-slate-400'
-                    }`}
-                  >
-                    <div>Ramon Dela Cruz</div>
-                    <div className="text-[10px] text-indigo-400">Rider #2</div>
-                  </button>
+                <label className="font-medium text-slate-300 block mb-1.5">Rider Username:</label>
+                <div className="relative">
+                  <User className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    placeholder="Enter rider username"
+                    className="w-full pl-10 pr-4 py-2.5 bg-slate-950/80 border border-slate-800 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 text-xs font-mono"
+                    required
+                  />
                 </div>
               </div>
 
@@ -378,6 +370,13 @@ export const LoginPage = ({
                     className="w-full pl-10 pr-10 py-2.5 bg-slate-950/80 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-indigo-500 text-xs"
                     required
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 p-1"
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
                 </div>
               </div>
 
@@ -415,7 +414,7 @@ export const LoginPage = ({
                   <User className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
                   <input
                     type="text"
-                    placeholder="e.g. verde or verde.family@gmail.com or 0939-111-2233"
+                    placeholder="Enter username, email, or mobile number"
                     value={customerIdentifier}
                     onChange={(e) => setCustomerIdentifier(e.target.value)}
                     className="w-full pl-10 pr-4 py-2.5 bg-slate-950/80 border border-slate-800 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 text-xs font-medium"
@@ -428,7 +427,6 @@ export const LoginPage = ({
               <div>
                 <div className="flex items-center justify-between mb-1.5">
                   <label className="font-medium text-slate-300">Customer Password:</label>
-                  <span className="text-[10px] text-slate-400">Default demo: password123</span>
                 </div>
                 <div className="relative">
                   <Lock className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />

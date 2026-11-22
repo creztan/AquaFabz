@@ -48,6 +48,15 @@ export function PhpMyAdminView() {
   const [editingRow, setEditingRow] = useState(null);
   const [newRowData, setNewRowData] = useState('');
   const [isInsertModalOpen, setIsInsertModalOpen] = useState(false);
+  const [statusBanner, setStatusBanner] = useState(null);
+  const [confirmAction, setConfirmAction] = useState(null);
+
+  const showStatus = (message, type = 'success') => {
+    setStatusBanner({ type, message });
+    setTimeout(() => {
+      setStatusBanner((prev) => (prev?.message === message ? null : prev));
+    }, 4500);
+  };
 
   // Table registry mapping
   const tables = {
@@ -61,11 +70,18 @@ export function PhpMyAdminView() {
     stock_movements: { data: stockMovements, setter: setStockMovements, name: 'stock_movements', label: 'Stock Movements', desc: 'Inventory stock-in and stock-out audit ledger' },
     activity_logs: { data: activityLogs, setter: setActivityLogs, name: 'activity_logs', label: 'Activity Logs', desc: 'System audit trail and staff actions' },
     users: { data: users, setter: setUsers, name: 'users', label: 'System Users', desc: 'Admin, staff, driver, and customer portal accounts' },
-    settings: { data: [settings], setter: (val) => setSettings(typeof val === 'function' ? val(settings)[0] : val[0]), name: 'settings', label: 'Station Settings', desc: 'Global station configuration and parameters' },
+    settings: { data: [settings], setter: (val) => setSettings(prev => { const res = typeof val === 'function' ? val([prev]) : val; return Array.isArray(res) && res[0] ? res[0] : prev; }), name: 'settings', label: 'Station Settings', desc: 'Global station configuration and parameters' },
   };
 
   const currentTableConfig = tables[selectedTable] || tables.orders;
   const tableData = Array.isArray(currentTableConfig.data) ? currentTableConfig.data : [currentTableConfig.data];
+  const filteredRows = tableData.filter((row) => {
+    if (!searchTerm.trim()) return true;
+    const q = searchTerm.toLowerCase();
+    return Object.values(row || {}).some((v) =>
+      String(typeof v === 'object' ? JSON.stringify(v) : (v ?? '')).toLowerCase().includes(q)
+    );
+  });
 
   // Table columns definition for structure view
   const getTableColumns = (tableName) => {
@@ -205,35 +221,98 @@ export function PhpMyAdminView() {
 
   // Delete All Data (Truncate Database)
   const handleTruncateAllData = () => {
-    if (window.confirm('WARNING: This will permanently delete ALL data across all tables in the AquaFabz MySQL database! Are you sure?')) {
-      setOrders([]);
-      setSales([]);
-      setCustomers([]);
-      setProducts([]);
-      setVendingMachines([]);
-      setVendingSales([]);
-      setContainers([]);
-      setStockMovements([]);
-      setActivityLogs([]);
-      localStorage.clear();
-      logActivity('Database Wiped', 'All records wiped clean via phpMyAdmin operations console', 'system');
-      alert('Success! All database tables have been emptied (truncated).');
-    }
+    setConfirmAction({
+      title: 'Empty All Operational Tables (TRUNCATE DB)',
+      message: 'This will permanently clear all orders, sales, customers, products, vending machines, containers, stock movements, and logs.',
+      onConfirm: () => {
+        setOrders([]);
+        setSales([]);
+        setCustomers([]);
+        setProducts([]);
+        setVendingMachines([]);
+        setVendingSales([]);
+        setContainers([]);
+        setStockMovements([]);
+        setActivityLogs([]);
+        logActivity('Database Wiped', 'All operational records wiped clean via phpMyAdmin operations console', 'system');
+        setConfirmAction(null);
+        showStatus('All operational database tables have been emptied (truncated).', 'success');
+      },
+    });
   };
 
   // Delete a single row
   const handleDeleteRow = (rowId) => {
-    if (window.confirm(`Delete record ID: ${rowId}?`)) {
-      currentTableConfig.setter(prev => {
-        if (!Array.isArray(prev)) return prev;
-        return prev.filter(item => item.id !== rowId);
-      });
-      logActivity('Record Deleted', `Deleted row ${rowId} from table ${selectedTable}`, 'system');
-    }
+    setConfirmAction({
+      title: `Delete Record (${rowId})`,
+      message: `Remove record ID "${rowId}" from table \`${selectedTable}\`?`,
+      onConfirm: () => {
+        currentTableConfig.setter((prev) => {
+          if (!Array.isArray(prev)) return prev;
+          return prev.filter((item) => item.id !== rowId);
+        });
+        logActivity('Record Deleted', `Deleted row ${rowId} from table ${selectedTable}`, 'system');
+        setConfirmAction(null);
+        showStatus(`Deleted record ${rowId} from \`${selectedTable}\`.`, 'success');
+      },
+    });
   };
 
   return (
     <div className="space-y-6 font-sans">
+      {/* Inline Status Banner */}
+      {statusBanner && (
+        <div
+          className={`p-3.5 rounded-2xl border text-xs font-semibold flex items-center justify-between gap-3 ${
+            statusBanner.type === 'error'
+              ? 'bg-rose-950/80 border-rose-500/40 text-rose-200'
+              : 'bg-emerald-950/80 border-emerald-500/40 text-emerald-200'
+          }`}
+        >
+          <div className="flex items-center gap-2">
+            {statusBanner.type === 'error' ? (
+              <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
+            ) : (
+              <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+            )}
+            <span>{statusBanner.message}</span>
+          </div>
+          <button
+            type="button"
+            onClick={() => setStatusBanner(null)}
+            className="text-slate-400 hover:text-white cursor-pointer"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+
+      {/* Inline Confirmation Prompt (replaces browser window.confirm) */}
+      {confirmAction && (
+        <div className="p-4 rounded-2xl bg-rose-950/90 border border-rose-500/50 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-lg">
+          <div className="text-xs space-y-0.5">
+            <div className="font-black text-rose-300">{confirmAction.title}</div>
+            <div className="text-slate-300">{confirmAction.message}</div>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              type="button"
+              onClick={() => setConfirmAction(null)}
+              className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-bold cursor-pointer"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={confirmAction.onConfirm}
+              className="px-3.5 py-1.5 bg-rose-600 hover:bg-rose-500 text-white rounded-xl text-xs font-bold cursor-pointer"
+            >
+              Confirm Action
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* phpMyAdmin Header Bar */}
       <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 text-white flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-xl">
         <div className="flex items-center gap-3">
@@ -251,6 +330,7 @@ export function PhpMyAdminView() {
 
         <div className="flex flex-wrap items-center gap-2">
           <button
+            type="button"
             onClick={handleTruncateAllData}
             className="px-3.5 py-2 bg-rose-600 hover:bg-rose-500 text-white rounded-xl text-xs font-bold shadow-md flex items-center gap-1.5 transition-all cursor-pointer"
             title="Delete all records across all tables"
@@ -259,6 +339,7 @@ export function PhpMyAdminView() {
             <span>Empty All Data (Truncate DB)</span>
           </button>
           <button
+            type="button"
             onClick={() => {
               const exportData = JSON.stringify({
                 orders, sales, customers, products, vendingMachines, vendingSales, containers, stockMovements, activityLogs, settings
@@ -269,6 +350,7 @@ export function PhpMyAdminView() {
               a.href = url;
               a.download = `aquafabz_mysql_dump_${new Date().toISOString().split('T')[0]}.json`;
               a.click();
+              URL.revokeObjectURL(url);
             }}
             className="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-bold border border-slate-700 flex items-center gap-1.5 transition-all cursor-pointer"
           >
@@ -377,15 +459,21 @@ export function PhpMyAdminView() {
                   />
                 </div>
                 <div className="text-xs text-slate-400 font-mono">
-                  Showing {tableData.length} entries
+                  Showing {filteredRows.length} of {tableData.length} entries
                 </div>
               </div>
 
-              {tableData.length === 0 ? (
+              {filteredRows.length === 0 ? (
                 <div className="py-16 text-center text-slate-500 space-y-2 bg-slate-950 rounded-2xl border border-slate-800/80">
                   <Database className="w-10 h-10 mx-auto text-slate-600" />
-                  <p className="font-semibold text-slate-400 text-sm">Table is empty (0 rows)</p>
-                  <p className="text-xs text-slate-500">All data in this table has been deleted or cleared.</p>
+                  <p className="font-semibold text-slate-400 text-sm">
+                    {tableData.length === 0 ? 'Table is empty (0 rows)' : 'No matching rows'}
+                  </p>
+                  <p className="text-xs text-slate-500">
+                    {tableData.length === 0
+                      ? 'All data in this table has been deleted or cleared.'
+                      : 'Try clearing your search filter.'}
+                  </p>
                 </div>
               ) : (
                 <div className="overflow-x-auto rounded-2xl border border-slate-800 bg-slate-950">
@@ -393,17 +481,18 @@ export function PhpMyAdminView() {
                     <thead className="bg-slate-900 border-b border-slate-800 text-slate-400 uppercase text-[10px]">
                       <tr>
                         <th className="p-3">Actions</th>
-                        {Object.keys(tableData[0] || {}).slice(0, 6).map((col) => (
+                        {Object.keys(filteredRows[0] || {}).slice(0, 6).map((col) => (
                           <th key={col} className="p-3">{col}</th>
                         ))}
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-800/60 text-slate-300">
-                      {tableData.map((row, idx) => (
+                      {filteredRows.map((row, idx) => (
                         <tr key={row.id || idx} className="hover:bg-slate-900/50 transition-colors">
                           <td className="p-3 flex items-center gap-1.5">
                             {row.id && (
                               <button
+                                type="button"
                                 onClick={() => handleDeleteRow(row.id)}
                                 className="p-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 rounded-lg transition-colors cursor-pointer"
                                 title="Delete row"
@@ -547,20 +636,37 @@ export function PhpMyAdminView() {
                 
                 <div className="flex flex-wrap gap-2 pt-2">
                   <button
+                    type="button"
                     onClick={() => {
+                      if (selectedTable === 'settings') {
+                        showStatus('Station settings table cannot be emptied while active.', 'error');
+                        return;
+                      }
                       currentTableConfig.setter([]);
-                      alert(`Table ${selectedTable} emptied successfully.`);
+                      logActivity('Table Emptied', `Truncated table ${selectedTable}`, 'system');
+                      showStatus(`Table \`${selectedTable}\` emptied successfully.`);
                     }}
                     className="px-3 py-2 bg-amber-600 hover:bg-amber-500 text-white rounded-xl font-bold transition-colors cursor-pointer"
                   >
                     Empty Table (TRUNCATE)
                   </button>
                   <button
+                    type="button"
                     onClick={() => {
-                      if (window.confirm(`Drop table ${selectedTable}?`)) {
-                        currentTableConfig.setter([]);
-                        alert(`Table ${selectedTable} dropped.`);
+                      if (selectedTable === 'settings') {
+                        showStatus('Station settings table cannot be dropped while active.', 'error');
+                        return;
                       }
+                      setConfirmAction({
+                        title: `Drop Table \`${selectedTable}\``,
+                        message: `Clear all records from \`${selectedTable}\`?`,
+                        onConfirm: () => {
+                          currentTableConfig.setter([]);
+                          logActivity('Table Dropped', `Cleared table ${selectedTable}`, 'system');
+                          setConfirmAction(null);
+                          showStatus(`Table \`${selectedTable}\` cleared.`);
+                        },
+                      });
                     }}
                     className="px-3 py-2 bg-rose-600 hover:bg-rose-500 text-white rounded-xl font-bold transition-colors cursor-pointer"
                   >

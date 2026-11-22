@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext.jsx';
 import {
   Settings,
@@ -50,16 +50,25 @@ export const SettingsView = () => {
   const [accPhone, setAccPhone] = useState(currentUser.phone);
   const [newPassword, setNewPassword] = useState('');
   const [savedAccountSuccess, setSavedAccountSuccess] = useState(false);
+  const [isConfirmResetOpen, setIsConfirmResetOpen] = useState(false);
+
+  useEffect(() => {
+    setAccName(currentUser.name || '');
+    setAccEmail(currentUser.email || '');
+    setAccPhone(currentUser.phone || '');
+    setNewPassword('');
+  }, [currentUser.id]);
 
   // Activity Log Search & Filter
   const [logSearch, setLogSearch] = useState('');
   const [logCategory, setLogCategory] = useState('all');
 
   const filteredLogs = activityLogs.filter((log) => {
+    const q = logSearch.toLowerCase();
     const matchesSearch =
-      log.action.toLowerCase().includes(logSearch.toLowerCase()) ||
-      log.details.toLowerCase().includes(logSearch.toLowerCase()) ||
-      log.userName.toLowerCase().includes(logSearch.toLowerCase());
+      (log.action || '').toLowerCase().includes(q) ||
+      (log.details || '').toLowerCase().includes(q) ||
+      (log.userName || '').toLowerCase().includes(q);
     const matchesCat = logCategory === 'all' || log.category === logCategory;
     return matchesSearch && matchesCat;
   });
@@ -87,11 +96,15 @@ export const SettingsView = () => {
 
   const handleSaveAccount = (e) => {
     e.preventDefault();
-    updateUser(currentUser.id, {
+    const updates = {
       name: accName,
       email: accEmail,
       phone: accPhone,
-    });
+    };
+    if (newPassword.trim()) {
+      updates.password = newPassword.trim();
+    }
+    updateUser(currentUser.id, updates);
     setSavedAccountSuccess(true);
     setNewPassword('');
     setTimeout(() => setSavedAccountSuccess(false), 3000);
@@ -115,18 +128,37 @@ export const SettingsView = () => {
         </div>
 
         <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => {
-              if (confirm('Reset system data back to default sample records? Any local changes will be refreshed.')) {
-                resetToDefaultData();
-              }
-            }}
-            className="flex items-center gap-1.5 px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold transition-colors"
-          >
-            <RotateCcw className="w-4 h-4" />
-            <span>Reset Demo Data</span>
-          </button>
+          {isConfirmResetOpen ? (
+            <div className="flex items-center gap-2 bg-rose-50 px-3 py-1.5 rounded-xl border border-rose-200 text-xs">
+              <span className="font-semibold text-rose-800">Load sample data?</span>
+              <button
+                type="button"
+                onClick={() => {
+                  resetToDefaultData();
+                  setIsConfirmResetOpen(false);
+                }}
+                className="px-2.5 py-1 bg-rose-600 hover:bg-rose-700 text-white rounded-lg font-bold cursor-pointer"
+              >
+                Confirm
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsConfirmResetOpen(false)}
+                className="px-2 py-1 bg-white text-slate-600 rounded-lg font-semibold border border-slate-200 cursor-pointer"
+              >
+                Cancel
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setIsConfirmResetOpen(true)}
+              className="flex items-center gap-1.5 px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold transition-colors cursor-pointer"
+            >
+              <RotateCcw className="w-4 h-4" />
+              <span>Reset Demo Data</span>
+            </button>
+          )}
         </div>
       </div>
 

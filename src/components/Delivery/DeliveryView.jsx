@@ -34,11 +34,12 @@ export const DeliveryView = () => {
 
   // Filter orders
   const filteredOrders = orders.filter((order) => {
+    const q = searchTerm.toLowerCase();
     const matchesSearch =
-      order.orderNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.deliveryAddress.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.barangay.toLowerCase().includes(searchTerm.toLowerCase());
+      (order.orderNumber || '').toLowerCase().includes(q) ||
+      (order.customerName || '').toLowerCase().includes(q) ||
+      (order.deliveryAddress || '').toLowerCase().includes(q) ||
+      (order.barangay || '').toLowerCase().includes(q);
 
     const matchesStatus = selectedStatus === 'all' || order.status === selectedStatus;
     const matchesRider =

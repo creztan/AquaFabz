@@ -24,8 +24,16 @@ import {
 
 export const LandingPage = ({
   onNavigateToLogin,
+  onSelectPortal,
   onNavigateToRegister,
 }) => {
+  const handleSelectPortal = (portal) => {
+    if (onSelectPortal) {
+      onSelectPortal(portal);
+    } else if (onNavigateToLogin) {
+      onNavigateToLogin();
+    }
+  };
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between relative selection:bg-cyan-500 selection:text-white">
       {/* Background ambient lighting */}
@@ -108,7 +116,7 @@ export const LandingPage = ({
           <div id="portals" className="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {/* Role Card 1: ADMIN */}
             <div
-              onClick={onNavigateToLogin}
+              onClick={() => handleSelectPortal('admin')}
               className="p-6 rounded-3xl bg-slate-900/90 border border-slate-800 hover:border-cyan-500/60 shadow-xl transition-all cursor-pointer group space-y-4 hover:scale-[1.02]"
             >
               <div className="w-12 h-12 rounded-2xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-bold">
@@ -133,7 +141,7 @@ export const LandingPage = ({
 
             {/* Role Card 2: STAFF */}
             <div
-              onClick={onNavigateToLogin}
+              onClick={() => handleSelectPortal('staff')}
               className="p-6 rounded-3xl bg-slate-900/90 border border-slate-800 hover:border-sky-500/60 shadow-xl transition-all cursor-pointer group space-y-4 hover:scale-[1.02]"
             >
               <div className="w-12 h-12 rounded-2xl bg-sky-500/20 text-sky-400 flex items-center justify-center font-bold">
@@ -158,7 +166,7 @@ export const LandingPage = ({
 
             {/* Role Card 3: DELIVERY */}
             <div
-              onClick={onNavigateToLogin}
+              onClick={() => handleSelectPortal('delivery')}
               className="p-6 rounded-3xl bg-slate-900/90 border border-slate-800 hover:border-indigo-500/60 shadow-xl transition-all cursor-pointer group space-y-4 hover:scale-[1.02]"
             >
               <div className="w-12 h-12 rounded-2xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center font-bold">
@@ -183,7 +191,7 @@ export const LandingPage = ({
 
             {/* Role Card 4: CUSTOMER */}
             <div
-              onClick={onNavigateToLogin}
+              onClick={() => handleSelectPortal('customer')}
               className="p-6 rounded-3xl bg-slate-900/90 border border-slate-800 hover:border-blue-500/60 shadow-xl transition-all cursor-pointer group space-y-4 hover:scale-[1.02]"
             >
               <div className="w-12 h-12 rounded-2xl bg-blue-500/20 text-blue-400 flex items-center justify-center font-bold">

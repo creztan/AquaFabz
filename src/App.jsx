@@ -63,7 +63,8 @@ function MainApp() {
   } = useApp();
 
   const [activeTab, setActiveTab] = useState('dashboard');
-  const [authLandingPage, setAuthLandingPage] = useState('login');
+  const [authLandingPage, setAuthLandingPage] = useState('landing');
+  const [selectedLoginPortal, setSelectedLoginPortal] = useState('admin');
   const [isPOSOpen, setIsPOSOpen] = useState(false);
   const [isNewOrderOpen, setIsNewOrderOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -76,7 +77,14 @@ function MainApp() {
     if (authLandingPage === 'landing') {
       return (
         <LandingPage
-          onNavigateToLogin={() => setAuthLandingPage('login')}
+          onNavigateToLogin={() => {
+            setSelectedLoginPortal('admin');
+            setAuthLandingPage('login');
+          }}
+          onSelectPortal={(portal) => {
+            setSelectedLoginPortal(portal);
+            setAuthLandingPage('login');
+          }}
           onNavigateToRegister={() => setAuthLandingPage('register')}
         />
       );
@@ -92,6 +100,7 @@ function MainApp() {
     }
     return (
       <LoginPage
+        initialPortal={selectedLoginPortal}
         onNavigateToRegister={() => setAuthLandingPage('register')}
         onNavigateToLanding={() => setAuthLandingPage('landing')}
         onSuccess={() => setActiveTab('dashboard')}
@@ -443,7 +452,7 @@ function MainApp() {
                   className="flex items-center gap-2 pl-2 pr-3 py-1.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-xs transition-colors cursor-pointer"
                 >
                   <div className="w-6 h-6 rounded-lg bg-gradient-to-tr from-cyan-600 to-indigo-600 text-white font-bold text-[10px] flex items-center justify-center">
-                    {currentUser.name[0]}
+                    {(currentUser?.name || 'U')[0]}
                   </div>
                   <div className="text-left hidden sm:block">
                     <div className="font-bold text-slate-800 text-[11px] leading-tight truncate max-w-[120px]">

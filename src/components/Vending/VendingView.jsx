@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext.jsx';
 import {
   Store,
@@ -37,6 +37,15 @@ export const VendingView = () => {
   const [isEditMachineModalOpen, setIsEditMachineModalOpen] = useState(false);
   const [selectedMachineId, setSelectedMachineId] = useState(vendingMachines[0]?.id || '');
   const [editingMachine, setEditingMachine] = useState(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState(null);
+
+  useEffect(() => {
+    if (vendingMachines.length === 0) {
+      setSelectedMachineId('');
+    } else if (!vendingMachines.some((vm) => vm.id === selectedMachineId)) {
+      setSelectedMachineId(vendingMachines[0].id);
+    }
+  }, [vendingMachines, selectedMachineId]);
 
   // Status Filter state
   const [statusFilter, setStatusFilter] = useState('all');
@@ -98,12 +107,15 @@ export const VendingView = () => {
   };
 
   const handleDeleteMachine = (vm) => {
-    if (window.confirm(`Are you sure you want to remove and decommission vending machine "${vm.name} (${vm.code})"?`)) {
-      deleteVendingMachine(vm.id);
-      if (editingMachine?.id === vm.id) {
-        setIsEditMachineModalOpen(false);
-        setEditingMachine(null);
-      }
+    if (confirmDeleteId !== vm.id) {
+      setConfirmDeleteId(vm.id);
+      return;
+    }
+    deleteVendingMachine(vm.id);
+    setConfirmDeleteId(null);
+    if (editingMachine?.id === vm.id) {
+      setIsEditMachineModalOpen(false);
+      setEditingMachine(null);
     }
   };
 
@@ -365,7 +377,10 @@ export const VendingView = () => {
       {/* Vending Machine Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {filteredMachines.map((vm) => {
-          const waterPercent = Math.round((vm.currentWaterLevelLiters / vm.waterCapacityLiters) * 100);
+          const waterPercent =
+            vm.waterCapacityLiters > 0
+              ? Math.round((vm.currentWaterLevelLiters / vm.waterCapacityLiters) * 100)
+              : 0;
           const isAvailable = vm.status === 'operational';
           const isOffline = vm.status === 'offline';
           const isMaintenance = vm.status === 'maintenance';
@@ -453,7 +468,7 @@ export const VendingView = () => {
                       ? 'bg-rose-500 hover:bg-rose-600 text-white shadow-sm'
                       : 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm'
                   }`}
-                  title={isAvailable ? 'Click to mark  / Offline' : 'Click to mark  / Operational'}
+                  title={isAvailable ? 'Click to mark Unavailable / Offline' : 'Click to mark Available / Operational'}
                 >
                   {isAvailable || isLowWater ? (
                     <>
@@ -523,15 +538,34 @@ export const VendingView = () => {
 
                 <div className="flex items-center gap-1.5">
                   {currentUser.role === 'admin' && (
-                    <button
-                      type="button"
-                      onClick={() => handleDeleteMachine(vm)}
-                      className="px-2.5 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold rounded-lg transition-colors text-xs flex items-center gap-1 cursor-pointer"
-                      title="Decommission & Remove Vending Machine"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                      <span>Remove</span>
-                    </button>
+                    confirmDeleteId === vm.id ? (
+                      <div className="flex items-center gap-1">
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteMachine(vm)}
+                          className="px-2.5 py-1.5 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-lg transition-colors text-xs cursor-pointer"
+                        >
+                          Confirm?
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setConfirmDeleteId(null)}
+                          className="px-2 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold rounded-lg text-xs cursor-pointer"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteMachine(vm)}
+                        className="px-2.5 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold rounded-lg transition-colors text-xs flex items-center gap-1 cursor-pointer"
+                        title="Decommission & Remove Vending Machine"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                        <span>Remove</span>
+                      </button>
+                    )
                   )}
 
                   <button
@@ -731,14 +765,33 @@ export const VendingView = () => {
 
               <div className="flex items-center justify-between pt-2">
                 {currentUser.role === 'admin' ? (
-                  <button
-                    type="button"
-                    onClick={() => handleDeleteMachine(editingMachine)}
-                    className="px-3.5 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold rounded-xl flex items-center gap-1.5 cursor-pointer text-xs"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                    <span>Decommission Unit</span>
-                  </button>
+                  confirmDeleteId === editingMachine.id ? (
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteMachine(editingMachine)}
+                        className="px-3 py-2 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl cursor-pointer text-xs"
+                      >
+                        Confirm Removal
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setConfirmDeleteId(null)}
+                        className="px-3 py-2 bg-slate-100 text-slate-600 font-semibold rounded-xl cursor-pointer text-xs"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteMachine(editingMachine)}
+                      className="px-3.5 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold rounded-xl flex items-center gap-1.5 cursor-pointer text-xs"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                      <span>Decommission Unit</span>
+                    </button>
+                  )
                 ) : <div />}
 
                 <div className="flex gap-2">

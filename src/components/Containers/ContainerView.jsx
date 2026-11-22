@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext.jsx';
 import {
   Droplets,
@@ -26,8 +26,16 @@ export const ContainerView = () => {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalType, setModalType] = useState('borrow');
-  const [selectedCustomerId, setSelectedCustomerId] = useState(customers[0]?.id || '');
+  const [selectedCustomerId, setSelectedCustomerId] = useState(customers[0]?.id || '__guest__');
   const [guestName, setGuestName] = useState('');
+
+  useEffect(() => {
+    if (customers.length === 0) {
+      setSelectedCustomerId('__guest__');
+    } else if (selectedCustomerId !== '__guest__' && !customers.some((c) => c.id === selectedCustomerId)) {
+      setSelectedCustomerId(customers[0].id);
+    }
+  }, [customers, selectedCustomerId]);
   const [containerType, setContainerType] = useState('5-Gallon Slim');
   const [quantity, setQuantity] = useState(2);
   const [depositPerJug, setDepositPerJug] = useState(settings.defaultContainerDeposit);
@@ -44,14 +52,14 @@ export const ContainerView = () => {
   const customersWithContainers = customers.filter(
     (c) =>
       c.containersHeld > 0 &&
-      (c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        c.barangay.toLowerCase().includes(searchTerm.toLowerCase()))
+      ((c.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (c.barangay || '').toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const customer = customers.find((c) => c.id === selectedCustomerId);
-    const customerName = customer ? customer.name : guestName || 'Walk-in Customer';
+    const customer = selectedCustomerId !== '__guest__' ? customers.find((c) => c.id === selectedCustomerId) : null;
+    const customerName = customer ? customer.name : guestName.trim() || 'Walk-in Customer';
 
     const depositAmount = modalType === 'borrow' ? quantity * depositPerJug : 0;
     const refundAmount = modalType === 'return' ? quantity * depositPerJug : 0;
@@ -353,12 +361,23 @@ export const ContainerView = () => {
                   onChange={(e) => setSelectedCustomerId(e.target.value)}
                   className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-medium"
                 >
+                  <option value="__guest__">Walk-in / Custom Customer</option>
                   {customers.map((c) => (
                     <option key={c.id} value={c.id}>
                       {c.name} ({c.containersHeld} currently held)
                     </option>
                   ))}
                 </select>
+                {selectedCustomerId === '__guest__' && (
+                  <input
+                    type="text"
+                    value={guestName}
+                    onChange={(e) => setGuestName(e.target.value)}
+                    placeholder="Enter walk-in customer name..."
+                    className="mt-2 w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-medium"
+                    required
+                  />
+                )}
               </div>
 
               <div className="grid grid-cols-2 gap-3">

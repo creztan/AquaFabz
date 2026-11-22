@@ -80,7 +80,7 @@ export const DeliveryMap = ({
 
   // Selected order metrics (Local math)
   const selectedMetrics = useMemo(() => {
-    if (!selectedOrder) return null;
+    if (!selectedOrder?.coordinates?.lat || !selectedOrder?.coordinates?.lng) return null;
     const originLat = driverLocation?.lat ?? stationLat;
     const originLng = driverLocation?.lng ?? stationLng;
     const dist = calculateDistanceKm(
@@ -247,6 +247,7 @@ export const DeliveryMap = ({
           iconAnchor: [16, 16],
         });
 
+        if (vm.coordinates?.lat == null || vm.coordinates?.lng == null) return;
         const marker = L.marker([vm.coordinates.lat, vm.coordinates.lng], { icon: vmIcon }).addTo(
           markersGroup
         );
@@ -303,12 +304,15 @@ export const DeliveryMap = ({
         statusIcon = '✓';
       }
 
+      const ordLat = order.coordinates?.lat ?? stationLat;
+      const ordLng = order.coordinates?.lng ?? stationLng;
+
       // Local distance calculation (zero API calls)
       const distFromStation = calculateDistanceKm(
         stationLat,
         stationLng,
-        order.coordinates.lat,
-        order.coordinates.lng
+        ordLat,
+        ordLng
       );
       const driveMins = estimateDriveMinutes(distFromStation);
 
@@ -348,7 +352,7 @@ export const DeliveryMap = ({
         iconAnchor: [18, 18],
       });
 
-      const marker = L.marker([order.coordinates.lat, order.coordinates.lng], {
+      const marker = L.marker([ordLat, ordLng], {
         icon: orderIcon,
       }).addTo(markersGroup);
 
@@ -395,14 +399,14 @@ export const DeliveryMap = ({
         </div>
       `);
 
-      routeWaypoints.push([order.coordinates.lat, order.coordinates.lng]);
+      routeWaypoints.push([ordLat, ordLng]);
 
       // Direct accent line to Selected Order or Out-for-Delivery
       if (isSelected || order.status === 'Out for Delivery') {
         const polyline = L.polyline(
           [
             [driverLocation ? driverLocation.lat : stationLat, driverLocation ? driverLocation.lng : stationLng],
-            [order.coordinates.lat, order.coordinates.lng],
+            [ordLat, ordLng],
           ],
           {
             color: isSelected ? '#f59e0b' : '#6366f1',
@@ -444,6 +448,7 @@ export const DeliveryMap = ({
           iconAnchor: [14, 14],
         });
 
+        if (cust.coordinates?.lat == null || cust.coordinates?.lng == null) return;
         const marker = L.marker([cust.coordinates.lat, cust.coordinates.lng], {
           icon: custIcon,
         }).addTo(markersGroup);
@@ -483,7 +488,7 @@ export const DeliveryMap = ({
   useEffect(() => {
     if (selectedOrderId && mapInstanceRef.current) {
       const order = orders.find((o) => o.id === selectedOrderId);
-      if (order) {
+      if (order?.coordinates?.lat != null && order?.coordinates?.lng != null) {
         mapInstanceRef.current.flyTo([order.coordinates.lat, order.coordinates.lng], 16, {
           duration: 1.2,
         });
@@ -506,7 +511,9 @@ export const DeliveryMap = ({
 
     const coords = [[stationLat, stationLng]];
     orders.forEach((o) => {
-      coords.push([o.coordinates.lat, o.coordinates.lng]);
+      if (o.coordinates?.lat != null && o.coordinates?.lng != null) {
+        coords.push([o.coordinates.lat, o.coordinates.lng]);
+      }
     });
     if (driverLocation) {
       coords.push([driverLocation.lat, driverLocation.lng]);

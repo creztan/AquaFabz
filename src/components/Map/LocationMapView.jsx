@@ -126,7 +126,9 @@ export const LocationMapView = () => {
                   <div className="flex justify-between">
                     <span>Coordinates:</span>
                     <span className="font-mono text-[11px] text-slate-800">
-                      {selectedOrder.coordinates.lat.toFixed(4)}, {selectedOrder.coordinates.lng.toFixed(4)}
+                      {selectedOrder.coordinates?.lat != null && selectedOrder.coordinates?.lng != null
+                        ? `${selectedOrder.coordinates.lat.toFixed(4)}, ${selectedOrder.coordinates.lng.toFixed(4)}`
+                        : 'Station Area'}
                     </span>
                   </div>
                   <div className="flex justify-between">

@@ -589,17 +589,17 @@ export const AppProvider = ({ children }) => {
 
     setSales((prev) => [newSale, ...prev]);
 
-    saleData.items.forEach((item) => {
-      setProducts((prev) =>
-        prev.map((p) => {
-          if (p.id === item.productId) {
-            const newStock = Math.max(0, p.stock - item.quantity);
-            return { ...p, stock: newStock };
-          }
-          return p;
-        })
-      );
-    });
+    setProducts((prev) =>
+      prev.map((p) => {
+        const purchasedQty = saleData.items
+          .filter((item) => item.productId === p.id)
+          .reduce((sum, item) => sum + item.quantity, 0);
+        if (purchasedQty > 0) {
+          return { ...p, stock: Math.max(0, p.stock - purchasedQty) };
+        }
+        return p;
+      })
+    );
 
     if (saleData.customerId) {
       setCustomers((prev) =>
@@ -699,7 +699,6 @@ export const AppProvider = ({ children }) => {
     setStockMovements(initialStockMovements);
     setActivityLogs(initialActivityLogs);
     setSettings(initialSettings);
-    localStorage.clear();
     logActivity('System Reset', 'All records reloaded to default sample dataset', 'system');
   };
 
@@ -714,23 +713,28 @@ export const AppProvider = ({ children }) => {
 
         currentUser,
         users,
+        setUsers,
         setCurrentUser,
         addUser,
         updateUser,
         deleteUser,
 
         customers,
+        setCustomers,
         addCustomer,
         updateCustomer,
         deleteCustomer,
 
         products,
+        setProducts,
         addProduct,
         updateProduct,
         deleteProduct,
 
         vendingMachines,
+        setVendingMachines,
         vendingSales,
+        setVendingSales,
         addVendingMachine,
         updateVendingMachine,
         deleteVendingMachine,
@@ -738,24 +742,30 @@ export const AppProvider = ({ children }) => {
         recordVendingCollection,
 
         orders,
+        setOrders,
         addOrder,
         updateOrderStatus,
         updateOrder,
         deleteOrder,
 
         sales,
+        setSales,
         recordSale,
 
         containers,
+        setContainers,
         recordContainerAction,
 
         stockMovements,
+        setStockMovements,
         recordStockMovement,
 
         activityLogs,
+        setActivityLogs,
         logActivity,
 
         settings,
+        setSettings,
         updateSettings,
 
         printableItem,

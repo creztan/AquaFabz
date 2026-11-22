@@ -21,7 +21,7 @@
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col antialiased">
 
   <!-- 1. LANDING PAGE VIEW (Opening View matching uploaded design) -->
-  <div id="view-landing" class="view-section flex-1 flex flex-col justify-between">
+  <div id="view-landing" class="flex-1 flex flex-col justify-between">
     <!-- Top Header -->
     <header class="relative z-20 border-b border-slate-800/80 bg-slate-950/80 backdrop-blur-md">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between gap-8">
@@ -37,8 +37,8 @@
 
         <nav class="hidden md:flex items-center gap-8 text-sm font-medium text-slate-400">
           <a href="#portals" class="hover:text-white transition-colors whitespace-nowrap">Role Portals</a>
-          <a href="#capabilities" class="hover:text-white transition-colors whitespace-nowrap">Operational Modules</a>
-          <a href="#vending" class="hover:text-white transition-colors whitespace-nowrap">24/7 Vending</a>
+          <a href="#portals" class="hover:text-white transition-colors whitespace-nowrap">Operational Modules</a>
+          <a href="#portals" class="hover:text-white transition-colors whitespace-nowrap">24/7 Vending</a>
         </nav>
 
         <div class="flex items-center gap-2.5 shrink-0">
@@ -175,19 +175,19 @@
 
         <!-- Navigation Tabs -->
         <nav class="hidden md:flex items-center gap-1.5 text-xs font-semibold">
-          <button type="button" onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-btn px-3 py-1.5 rounded-lg bg-cyan-600 text-white transition-colors cursor-pointer">
+          <button type="button" onclick="switchTab('dashboard')" id="nav-dashboard" data-tab="dashboard" class="nav-btn px-3 py-1.5 rounded-lg bg-cyan-600 text-white transition-colors cursor-pointer">
             <i class="fa-solid fa-chart-pie mr-1"></i> Dashboard
           </button>
-          <button type="button" onclick="switchTab('pos')" id="nav-pos" class="nav-btn px-3 py-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-900 transition-colors cursor-pointer">
+          <button type="button" onclick="switchTab('pos')" id="nav-pos" data-tab="pos" class="nav-btn px-3 py-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-900 transition-colors cursor-pointer">
             <i class="fa-solid fa-cash-register mr-1 text-emerald-400"></i> POS Counter
           </button>
-          <button type="button" onclick="switchTab('deliveries')" id="nav-deliveries" class="nav-btn px-3 py-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-900 transition-colors cursor-pointer">
+          <button type="button" onclick="switchTab('deliveries')" id="nav-deliveries" data-tab="deliveries" class="nav-btn px-3 py-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-900 transition-colors cursor-pointer">
             <i class="fa-solid fa-truck mr-1 text-indigo-400"></i> Deliveries & Map
           </button>
-          <button type="button" onclick="switchTab('vending')" id="nav-vending" class="nav-btn px-3 py-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-900 transition-colors cursor-pointer">
+          <button type="button" onclick="switchTab('vending')" id="nav-vending" data-tab="vending" class="nav-btn px-3 py-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-900 transition-colors cursor-pointer">
             <i class="fa-solid fa-store mr-1 text-purple-400"></i> Vending Fleet
           </button>
-          <button type="button" onclick="switchTab('containers')" id="nav-containers" class="nav-btn px-3 py-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-900 transition-colors cursor-pointer">
+          <button type="button" onclick="switchTab('containers')" id="nav-containers" data-tab="containers" class="nav-btn px-3 py-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-900 transition-colors cursor-pointer">
             <i class="fa-solid fa-box-archive mr-1 text-blue-400"></i> Containers
           </button>
         </nav>
@@ -202,6 +202,25 @@
             <option value="customer">Customer Portal</option>
           </select>
         </div>
+      </div>
+
+      <!-- Mobile Navigation Tabs -->
+      <div class="md:hidden border-t border-slate-800/80 bg-slate-950/95 px-4 py-2 flex items-center gap-1.5 overflow-x-auto text-xs font-semibold">
+        <button type="button" onclick="switchTab('dashboard')" id="mnav-dashboard" data-tab="dashboard" class="nav-btn shrink-0 px-3 py-1.5 rounded-lg bg-cyan-600 text-white transition-colors cursor-pointer">
+          <i class="fa-solid fa-chart-pie mr-1"></i> Dashboard
+        </button>
+        <button type="button" onclick="switchTab('pos')" id="mnav-pos" data-tab="pos" class="nav-btn shrink-0 px-3 py-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-900 transition-colors cursor-pointer">
+          <i class="fa-solid fa-cash-register mr-1 text-emerald-400"></i> POS
+        </button>
+        <button type="button" onclick="switchTab('deliveries')" id="mnav-deliveries" data-tab="deliveries" class="nav-btn shrink-0 px-3 py-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-900 transition-colors cursor-pointer">
+          <i class="fa-solid fa-truck mr-1 text-indigo-400"></i> Deliveries & Map
+        </button>
+        <button type="button" onclick="switchTab('vending')" id="mnav-vending" data-tab="vending" class="nav-btn shrink-0 px-3 py-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-900 transition-colors cursor-pointer">
+          <i class="fa-solid fa-store mr-1 text-purple-400"></i> Vending
+        </button>
+        <button type="button" onclick="switchTab('containers')" id="mnav-containers" data-tab="containers" class="nav-btn shrink-0 px-3 py-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-900 transition-colors cursor-pointer">
+          <i class="fa-solid fa-box-archive mr-1 text-blue-400"></i> Containers
+        </button>
       </div>
     </header>
 
@@ -218,11 +237,14 @@
           </div>
 
           <div class="flex flex-wrap items-center gap-2">
-            <button onclick="switchTab('pos')" class="px-3.5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold shadow-md flex items-center gap-1.5 cursor-pointer">
+            <button id="dashPosBtn" onclick="switchTab('pos')" class="px-3.5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold shadow-md flex items-center gap-1.5 cursor-pointer">
               <i class="fa-solid fa-cash-register"></i> Open POS Counter
             </button>
+            <button id="dashCustomerRefillBtn" onclick="document.getElementById('newDeliveryModal').classList.remove('hidden')" class="hidden px-3.5 py-2.5 bg-cyan-600 hover:bg-cyan-500 text-white rounded-xl text-xs font-bold shadow-md flex items-center gap-1.5 cursor-pointer">
+              <i class="fa-solid fa-droplet"></i> Request Water Refill
+            </button>
             <button onclick="switchTab('deliveries')" class="px-3.5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold shadow-md flex items-center gap-1.5 cursor-pointer">
-              <i class="fa-solid fa-truck"></i> Driver Route Map
+              <i class="fa-solid fa-truck"></i> <span id="dashDeliveryBtnLabel">Driver Route Map</span>
             </button>
           </div>
         </div>
@@ -479,6 +501,31 @@
     </div>
   </div>
 
+  <!-- Confirmation Modal (Replaces browser confirm) -->
+  <div id="confirmModal" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-700 rounded-3xl p-6 max-w-sm w-full space-y-4 shadow-2xl">
+      <div class="flex items-center gap-3 text-rose-400">
+        <div class="w-10 h-10 rounded-2xl bg-rose-500/20 flex items-center justify-center shrink-0">
+          <i class="fa-solid fa-triangle-exclamation text-lg"></i>
+        </div>
+        <div>
+          <h3 class="font-bold text-white text-sm">Confirm Action</h3>
+          <p id="confirmModalMessage" class="text-xs text-slate-300 mt-1"></p>
+        </div>
+      </div>
+      <div class="flex justify-end gap-2 pt-2">
+        <button type="button" onclick="closeConfirmModal()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-semibold cursor-pointer">Cancel</button>
+        <button type="button" id="confirmModalActionBtn" class="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white rounded-xl text-xs font-bold cursor-pointer">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="appToast" class="hidden fixed bottom-5 right-5 z-50 max-w-sm bg-slate-900 border border-cyan-500/50 text-white px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-2.5 text-xs font-semibold">
+    <i id="appToastIcon" class="fa-solid fa-circle-check text-emerald-400 text-base"></i>
+    <span id="appToastText"></span>
+  </div>
+
   <!-- Single-File Client JavaScript Core -->
   <script>
     const DEFAULT_PRODUCTS = [
@@ -552,6 +599,49 @@
     let mapInstance = null;
     let mapMarkersGroup = null;
 
+    let currentTab = 'dashboard';
+    let toastTimer = null;
+    let pendingConfirmCallback = null;
+
+    function showToast(message, isWarning = false) {
+      const toast = document.getElementById('appToast');
+      const text = document.getElementById('appToastText');
+      const icon = document.getElementById('appToastIcon');
+      if (!toast || !text) return;
+
+      text.innerText = message;
+      if (icon) {
+        icon.className = isWarning
+          ? 'fa-solid fa-circle-info text-amber-400 text-base'
+          : 'fa-solid fa-circle-check text-emerald-400 text-base';
+      }
+      toast.classList.remove('hidden');
+      if (toastTimer) clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.add('hidden'), 3500);
+    }
+
+    function openConfirmModal(message, onConfirm) {
+      const modal = document.getElementById('confirmModal');
+      const msgEl = document.getElementById('confirmModalMessage');
+      const actionBtn = document.getElementById('confirmModalActionBtn');
+      if (!modal || !msgEl || !actionBtn) return;
+
+      msgEl.innerText = message;
+      pendingConfirmCallback = onConfirm;
+      actionBtn.onclick = () => {
+        const cb = pendingConfirmCallback;
+        closeConfirmModal();
+        if (cb) cb();
+      };
+      modal.classList.remove('hidden');
+    }
+
+    function closeConfirmModal() {
+      const modal = document.getElementById('confirmModal');
+      if (modal) modal.classList.add('hidden');
+      pendingConfirmCallback = null;
+    }
+
     function switchView(viewKey) {
       const landing = document.getElementById('view-landing');
       const shell = document.getElementById('app-shell');
@@ -574,20 +664,21 @@
     }
 
     function switchTab(tabId) {
+      currentTab = tabId;
       document.querySelectorAll('.view-section').forEach(sec => sec.classList.add('hidden'));
       const target = document.getElementById('view-' + tabId);
       if (target) target.classList.remove('hidden');
 
       document.querySelectorAll('.nav-btn').forEach(btn => {
-        btn.classList.remove('bg-cyan-600', 'text-white');
-        btn.classList.add('text-slate-300');
+        const isTarget = btn.getAttribute('data-tab') === tabId;
+        if (isTarget) {
+          btn.classList.add('bg-cyan-600', 'text-white');
+          btn.classList.remove('text-slate-300');
+        } else {
+          btn.classList.remove('bg-cyan-600', 'text-white');
+          btn.classList.add('text-slate-300');
+        }
       });
-
-      const activeNav = document.getElementById('nav-' + tabId);
-      if (activeNav) {
-        activeNav.classList.add('bg-cyan-600', 'text-white');
-        activeNav.classList.remove('text-slate-300');
-      }
 
       if (tabId === 'deliveries') {
         initOrUpdateMap();
@@ -600,19 +691,47 @@
         admin: 'Welcome, Administrator (Eugene)',
         staff: 'Welcome, Staff Cashier (Chrysty)',
         delivery: 'Welcome, Delivery Driver (Jacob)',
-        customer: 'Welcome, Customer Portal'
+        customer: 'Welcome, Customer Refill Portal'
       };
       document.getElementById('welcomeHeading').innerText = titles[role] || 'Welcome, User';
 
       const adminPos = document.getElementById('adminPosActions');
       const adminVending = document.getElementById('adminVendingActions');
       const navPos = document.getElementById('nav-pos');
+      const mnavPos = document.getElementById('mnav-pos');
+      const navVending = document.getElementById('nav-vending');
+      const mnavVending = document.getElementById('mnav-vending');
+      const dashPosBtn = document.getElementById('dashPosBtn');
+      const dashCustomerRefillBtn = document.getElementById('dashCustomerRefillBtn');
+      const dashDeliveryBtnLabel = document.getElementById('dashDeliveryBtnLabel');
+
+      const hidePos = role === 'delivery' || role === 'customer';
+      const hideVending = role === 'customer';
 
       if (adminPos) adminPos.style.display = role === 'admin' ? 'flex' : 'none';
       if (adminVending) adminVending.style.display = role === 'admin' ? 'block' : 'none';
-      if (navPos) navPos.style.display = role === 'delivery' ? 'none' : 'inline-flex';
+      if (navPos) navPos.style.display = hidePos ? 'none' : 'inline-flex';
+      if (mnavPos) mnavPos.style.display = hidePos ? 'none' : 'inline-flex';
+      if (navVending) navVending.style.display = hideVending ? 'none' : 'inline-flex';
+      if (mnavVending) mnavVending.style.display = hideVending ? 'none' : 'inline-flex';
+      if (dashPosBtn) dashPosBtn.style.display = hidePos ? 'none' : 'flex';
+      if (dashCustomerRefillBtn) {
+        if (role === 'customer') dashCustomerRefillBtn.classList.remove('hidden');
+        else dashCustomerRefillBtn.classList.add('hidden');
+      }
+      if (dashDeliveryBtnLabel) {
+        dashDeliveryBtnLabel.innerText = role === 'customer' ? 'Track Deliveries & Map' : 'Driver Route Map';
+      }
+
+      if ((hidePos && currentTab === 'pos') || (hideVending && currentTab === 'vending')) {
+        switchTab('dashboard');
+      }
 
       renderPosProducts();
+      renderDeliveryQueue();
+      renderVendingMachines();
+      renderContainers();
+      updateKpi();
     }
 
     function renderPosProducts() {
@@ -767,7 +886,7 @@
       orders.unshift(newOrd);
       saveData('orders', orders);
 
-      alert('Sale successfully completed! Ticket: ' + newOrd.orderNumber + ' (₱' + newOrd.amount + ')');
+      showToast('Sale completed! Ticket: ' + newOrd.orderNumber + ' (₱' + newOrd.amount.toFixed(2) + ')');
       clearPosCart();
       renderDeliveryQueue();
       updateKpi();
@@ -785,14 +904,17 @@
       document.getElementById('posAddModal').classList.add('hidden');
       renderPosProducts();
       updateKpi();
+      showToast('Added product: ' + name);
     }
 
     function deleteProduct(prodId) {
-      if (!confirm('Remove this product permanently from the station listing?')) return;
-      products = products.filter(p => p.id !== prodId);
-      saveData('products', products);
-      renderPosProducts();
-      updateKpi();
+      openConfirmModal('Remove this product permanently from the station listing?', () => {
+        products = products.filter(p => p.id !== prodId);
+        saveData('products', products);
+        renderPosProducts();
+        updateKpi();
+        showToast('Product removed from listing.');
+      });
     }
 
     function renderVendingMachines() {
@@ -874,11 +996,13 @@
     }
 
     function removeVendingMachine(machineId) {
-      if (!confirm('Remove this vending machine from the fleet?')) return;
-      vendingMachines = vendingMachines.filter(m => m.id !== machineId);
-      saveData('vending', vendingMachines);
-      renderVendingMachines();
-      updateKpi();
+      openConfirmModal('Remove this vending machine from the fleet?', () => {
+        vendingMachines = vendingMachines.filter(m => m.id !== machineId);
+        saveData('vending', vendingMachines);
+        renderVendingMachines();
+        updateKpi();
+        showToast('Vending machine removed.');
+      });
     }
 
     function updateVendingStatus(machineId, newStatus) {
@@ -1023,6 +1147,10 @@
       if (waypoints.length > 1) {
         L.polyline(waypoints, { color: '#6366f1', weight: 3, dashArray: '6, 6' }).addTo(mapMarkersGroup);
       }
+
+      setTimeout(() => {
+        if (mapInstance) mapInstance.invalidateSize();
+      }, 120);
     }
 
     function locateBrowserRider() {
@@ -1033,8 +1161,10 @@
           const marker = L.circleMarker([lat, lng], { radius: 9, fillColor: '#10b981', color: '#fff', weight: 3, fillOpacity: 1 }).addTo(mapInstance);
           marker.bindPopup('<b>Your Live Position (Rider)</b>').openPopup();
           mapInstance.flyTo([lat, lng], 15);
+          showToast('GPS position updated on driver map.');
         }, () => {
-          alert('Could not access device GPS. Defaulting to station coordinates.');
+          if (mapInstance) mapInstance.flyTo([10.2014, 122.8601], 14);
+          showToast('Device GPS unavailable. Centered on Station HQ.', true);
         });
       }
     }

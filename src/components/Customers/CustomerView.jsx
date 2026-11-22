@@ -51,14 +51,16 @@ export const CustomerView = () => {
   const [custLat, setCustLat] = useState(settings.coordinates.lat);
   const [custLng, setCustLng] = useState(settings.coordinates.lng);
   const [custNotes, setCustNotes] = useState('');
+  const [confirmDeleteId, setConfirmDeleteId] = useState(null);
 
   // Filter customers
   const filteredCustomers = customers.filter((c) => {
+    const q = searchTerm.toLowerCase();
     const matchesSearch =
-      c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      c.contactNumber.includes(searchTerm) ||
-      c.primaryAddress.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      c.barangay.toLowerCase().includes(searchTerm.toLowerCase());
+      (c.name || '').toLowerCase().includes(q) ||
+      (c.contactNumber || '').includes(searchTerm) ||
+      (c.primaryAddress || '').toLowerCase().includes(q) ||
+      (c.barangay || '').toLowerCase().includes(q);
     const matchesType = selectedType === 'all' || c.customerType === selectedType;
     return matchesSearch && matchesType;
   });
@@ -81,14 +83,15 @@ export const CustomerView = () => {
 
   const openEditModal = (cust) => {
     setIsEditing(true);
-    setCustName(cust.name);
-    setCustPhone(cust.contactNumber);
+    setCustName(cust.name || '');
+    setCustPhone(cust.contactNumber || '');
     setCustEmail(cust.email || '');
-    setCustType(cust.customerType);
-    setCustAddress(cust.primaryAddress);
-    setCustBarangay(cust.barangay);
-    setCustLat(cust.coordinates.lat);
-    setCustLng(cust.coordinates.lng);
+    setCustType(cust.customerType || 'Residential');
+    setCustAddress(cust.primaryAddress || '');
+    setCustBarangay(cust.barangay || 'Brgy. Enclaro');
+    setCustContainers(String(cust.containersHeld ?? 0));
+    setCustLat(cust.coordinates?.lat ?? settings.coordinates.lat);
+    setCustLng(cust.coordinates?.lng ?? settings.coordinates.lng);
     setCustNotes(cust.deliveryNotes || '');
     setIsAddEditModalOpen(true);
   };
@@ -96,6 +99,7 @@ export const CustomerView = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!custName || !custAddress) return;
+    const parsedContainers = parseInt(custContainers, 10) || 0;
 
     if (isEditing && selectedCustomer) {
       updateCustomer(selectedCustomer.id, {
@@ -105,6 +109,7 @@ export const CustomerView = () => {
         customerType: custType,
         primaryAddress: custAddress,
         barangay: custBarangay,
+        containersHeld: parsedContainers,
         coordinates: {
           lat: custLat,
           lng: custLng,
@@ -121,6 +126,7 @@ export const CustomerView = () => {
               customerType: custType,
               primaryAddress: custAddress,
               barangay: custBarangay,
+              containersHeld: parsedContainers,
               coordinates: { lat: custLat, lng: custLng },
               deliveryNotes: custNotes,
             }
@@ -293,24 +299,43 @@ export const CustomerView = () => {
                   <button
                     type="button"
                     onClick={() => openEditModal(selectedCustomer)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold transition-colors"
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold transition-colors cursor-pointer"
                   >
                     <Edit2 className="w-3.5 h-3.5" />
                     <span>Edit Profile</span>
                   </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (confirm(`Remove customer record for ${selectedCustomer.name}?`)) {
-                        deleteCustomer(selectedCustomer.id);
-                        setSelectedCustomer(customers[0] || null);
-                      }
-                    }}
-                    className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg transition-colors"
-                    title="Delete Customer"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+                  {confirmDeleteId === selectedCustomer.id ? (
+                    <div className="flex items-center gap-1.5 bg-rose-50 px-2.5 py-1 rounded-xl border border-rose-200">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const remaining = customers.filter((c) => c.id !== selectedCustomer.id);
+                          deleteCustomer(selectedCustomer.id);
+                          setSelectedCustomer(remaining[0] || null);
+                          setConfirmDeleteId(null);
+                        }}
+                        className="text-[11px] font-bold text-rose-700 hover:underline cursor-pointer"
+                      >
+                        Confirm
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setConfirmDeleteId(null)}
+                        className="text-[11px] font-semibold text-slate-500 hover:text-slate-700 cursor-pointer"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setConfirmDeleteId(selectedCustomer.id)}
+                      className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
+                      title="Delete Customer"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  )}
                 </div>
               </div>
 
@@ -351,7 +376,10 @@ export const CustomerView = () => {
                     <span>Delivery Location & Map Coordinates</span>
                   </h4>
                   <span className="font-mono text-[10px] text-slate-500 bg-slate-100 px-2 py-0.5 rounded">
-                    GPS: {selectedCustomer.coordinates.lat.toFixed(4)}, {selectedCustomer.coordinates.lng.toFixed(4)}
+                    GPS:{' '}
+                    {selectedCustomer.coordinates?.lat != null && selectedCustomer.coordinates?.lng != null
+                      ? `${selectedCustomer.coordinates.lat.toFixed(4)}, ${selectedCustomer.coordinates.lng.toFixed(4)}`
+                      : 'Not Pinned'}
                   </span>
                 </div>
 
@@ -397,7 +425,7 @@ export const CustomerView = () => {
                           )}
                         </div>
                         <span className="font-mono text-[10px] text-indigo-600">
-                          {loc.lat.toFixed(4)}, {loc.lng.toFixed(4)}
+                          {loc.lat != null && loc.lng != null ? `${loc.lat.toFixed(4)}, ${loc.lng.toFixed(4)}` : '—'}
                         </span>
                       </div>
                     ))}

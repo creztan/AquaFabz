@@ -24,9 +24,9 @@ export const SalesView = ({ onOpenPOS }) => {
 
   const filteredSales = sales.filter((s) => {
     const matchesSearch =
-      s.transactionNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      s.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      s.staffName.toLowerCase().includes(searchTerm.toLowerCase());
+      (s.transactionNumber || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (s.customerName || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (s.staffName || '').toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesType =
       filterType === 'all'
@@ -65,6 +65,7 @@ export const SalesView = ({ onOpenPOS }) => {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   return (

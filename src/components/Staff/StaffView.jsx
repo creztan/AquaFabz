@@ -19,6 +19,7 @@ export const StaffView = () => {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingUserId, setEditingUserId] = useState(null);
+  const [confirmDeleteUserId, setConfirmDeleteUserId] = useState(null);
 
   // Form states
   const [name, setName] = useState('');
@@ -233,18 +234,36 @@ export const StaffView = () => {
                       <Edit2 className="w-3.5 h-3.5" />
                     </button>
                     {u.id !== currentUser.id && (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          if (confirm(`Deactivate staff account for ${u.name}?`)) {
-                            deleteUser(u.id);
-                          }
-                        }}
-                        className="p-1.5 text-rose-400 hover:text-rose-600 rounded-lg hover:bg-rose-50 transition-colors"
-                        title="Deactivate Account"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
+                      confirmDeleteUserId === u.id ? (
+                        <div className="flex items-center gap-1 bg-rose-50 px-2 py-0.5 rounded-lg border border-rose-200">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              deleteUser(u.id);
+                              setConfirmDeleteUserId(null);
+                            }}
+                            className="text-[10px] font-bold text-rose-700 hover:underline cursor-pointer"
+                          >
+                            Remove
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setConfirmDeleteUserId(null)}
+                            className="text-[10px] font-semibold text-slate-500 hover:text-slate-700 cursor-pointer"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => setConfirmDeleteUserId(u.id)}
+                          className="p-1.5 text-rose-400 hover:text-rose-600 rounded-lg hover:bg-rose-50 transition-colors cursor-pointer"
+                          title="Deactivate Account"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      )
                     )}
                   </div>
                 )}
@@ -386,7 +405,7 @@ export const StaffView = () => {
                 <label className="font-semibold text-slate-700 block mb-1">Account Status:</label>
                 <select
                   value={status}
-                  onChange={(e) => setStatus(e.target.value  | 'inactive')}
+                  onChange={(e) => setStatus(e.target.value || 'inactive')}
                   className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl"
                 >
                   <option value="active">Active (Access Granted)</option>

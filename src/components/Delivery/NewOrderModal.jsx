@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext.jsx';
 import {
   X,
@@ -12,12 +12,14 @@ import {
   ShoppingBag,
 } from 'lucide-react';
 
-
-
 export const NewOrderModal = ({ isOpen, onClose }) => {
-  const { customers, products, addOrder, users, settings } = useApp();
+  const { customers, products, addOrder, users, settings, currentUser } = useApp();
 
-  const [selectedCustomerId, setSelectedCustomerId] = useState(customers[0]?.id || '');
+  const [selectedCustomerId, setSelectedCustomerId] = useState(customers[0]?.id || '__manual__');
+  const [manualName, setManualName] = useState('');
+  const [manualPhone, setManualPhone] = useState('');
+  const [manualAddress, setManualAddress] = useState('');
+  const [manualBarangay, setManualBarangay] = useState('Brgy. Enclaro');
   const [orderType, setOrderType] = useState('delivery');
   const [cart, setCart] = useState([
     {
@@ -38,10 +40,39 @@ export const NewOrderModal = ({ isOpen, onClose }) => {
   const [paymentStatus, setPaymentStatus] = useState('unpaid');
   const [deliveryNotes, setDeliveryNotes] = useState('');
   const [containersToReturn, setContainersToReturn] = useState(5);
+  const [formError, setFormError] = useState('');
+
+  useEffect(() => {
+    if (!isOpen) return;
+    setFormError('');
+    setDeliveryFee(settings.defaultDeliveryFee);
+    if (currentUser?.role === 'customer') {
+      const matched = customers.find(
+        (c) =>
+          c.id === currentUser.customerId ||
+          c.id === currentUser.id.replace('cust-', '') ||
+          c.name?.toLowerCase() === currentUser.name?.toLowerCase()
+      );
+      if (matched) {
+        setSelectedCustomerId(matched.id);
+      } else {
+        setSelectedCustomerId('__manual__');
+        setManualName(currentUser.name || '');
+        setManualPhone(currentUser.phone || '');
+      }
+    } else if (customers.length > 0 && (!selectedCustomerId || selectedCustomerId === '__manual__' || !customers.some((c) => c.id === selectedCustomerId))) {
+      setSelectedCustomerId(customers[0].id);
+    } else if (customers.length === 0) {
+      setSelectedCustomerId('__manual__');
+    }
+  }, [isOpen, customers, currentUser, settings.defaultDeliveryFee]);
 
   if (!isOpen) return null;
 
-  const currentCustomer = customers.find((c) => c.id === selectedCustomerId) || customers[0];
+  const currentCustomer =
+    selectedCustomerId === '__manual__'
+      ? null
+      : customers.find((c) => c.id === selectedCustomerId) || null;
 
   const handleAddItem = (productId) => {
     const prod = products.find((p) => p.id === productId);
@@ -92,16 +123,38 @@ export const NewOrderModal = ({ isOpen, onClose }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!currentCustomer || cart.length === 0) return;
+    if (cart.length === 0) {
+      setFormError('Please add at least one product item to dispatch this order.');
+      return;
+    }
+
+    const custName = currentCustomer ? currentCustomer.name : manualName.trim();
+    const custAddress = currentCustomer
+      ? currentCustomer.primaryAddress
+      : manualAddress.trim() || (orderType === 'pickup' ? 'Station Pickup Counter' : '');
+
+    if (!custName) {
+      setFormError('Please enter a customer name.');
+      return;
+    }
+    if (orderType === 'delivery' && !custAddress) {
+      setFormError('Please enter a delivery street address.');
+      return;
+    }
+
+    const fallbackCoords = {
+      lat: settings?.coordinates?.lat ?? 10.2014,
+      lng: settings?.coordinates?.lng ?? 122.8601,
+    };
 
     addOrder({
-      customerId: currentCustomer.id,
-      customerName: currentCustomer.name,
-      customerPhone: currentCustomer.contactNumber,
-      deliveryAddress: currentCustomer.primaryAddress,
-      barangay: currentCustomer.barangay,
-      coordinates: currentCustomer.coordinates,
-      deliveryNotes: deliveryNotes || currentCustomer.deliveryNotes,
+      customerId: currentCustomer?.id,
+      customerName: custName,
+      customerPhone: currentCustomer ? currentCustomer.contactNumber : manualPhone.trim() || '0912-000-0000',
+      deliveryAddress: custAddress,
+      barangay: currentCustomer ? currentCustomer.barangay : manualBarangay,
+      coordinates: currentCustomer?.coordinates || fallbackCoords,
+      deliveryNotes: deliveryNotes || currentCustomer?.deliveryNotes || '',
       items: cart,
       subtotal,
       deliveryFee: effectiveDeliveryFee,
@@ -116,6 +169,11 @@ export const NewOrderModal = ({ isOpen, onClose }) => {
       containersToReturnCount: containersToReturn,
     });
 
+    setManualName('');
+    setManualPhone('');
+    setManualAddress('');
+    setDeliveryNotes('');
+    setFormError('');
     onClose();
   };
 
@@ -127,12 +185,18 @@ export const NewOrderModal = ({ isOpen, onClose }) => {
             <Truck className="w-5 h-5" />
             <h3 className="font-bold text-sm">Create New Delivery or Pickup Order</h3>
           </div>
-          <button type="button" onClick={onClose} className="text-indigo-200 hover:text-white">
+          <button type="button" onClick={onClose} className="text-indigo-200 hover:text-white cursor-pointer">
             ✕
           </button>
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 overflow-y-auto space-y-4 text-xs">
+          {formError && (
+            <div className="p-3 bg-rose-50 border border-rose-200 text-rose-700 rounded-xl font-semibold">
+              {formError}
+            </div>
+          )}
+
           {/* Order Type & Customer */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
@@ -147,6 +211,7 @@ export const NewOrderModal = ({ isOpen, onClose }) => {
                     {c.name} ({c.barangay})
                   </option>
                 ))}
+                <option value="__manual__">+ Enter Custom / Walk-in Customer</option>
               </select>
             </div>
 
@@ -156,7 +221,7 @@ export const NewOrderModal = ({ isOpen, onClose }) => {
                 <button
                   type="button"
                   onClick={() => setOrderType('delivery')}
-                  className={`py-2 rounded-xl font-bold transition-all ${
+                  className={`py-2 rounded-xl font-bold transition-all cursor-pointer ${
                     orderType === 'delivery'
                       ? 'bg-indigo-600 text-white shadow-sm'
                       : 'bg-slate-100 text-slate-600'
@@ -167,7 +232,7 @@ export const NewOrderModal = ({ isOpen, onClose }) => {
                 <button
                   type="button"
                   onClick={() => setOrderType('pickup')}
-                  className={`py-2 rounded-xl font-bold transition-all ${
+                  className={`py-2 rounded-xl font-bold transition-all cursor-pointer ${
                     orderType === 'pickup'
                       ? 'bg-indigo-600 text-white shadow-sm'
                       : 'bg-slate-100 text-slate-600'
@@ -179,6 +244,57 @@ export const NewOrderModal = ({ isOpen, onClose }) => {
             </div>
           </div>
 
+          {/* Manual Customer Details when custom/walk-in selected */}
+          {!currentCustomer && (
+            <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200 grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              <div>
+                <label className="font-semibold text-slate-700 block mb-1">Customer Full Name:</label>
+                <input
+                  type="text"
+                  value={manualName}
+                  onChange={(e) => setManualName(e.target.value)}
+                  placeholder="e.g. Juan Dela Cruz"
+                  className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-lg"
+                  required
+                />
+              </div>
+              <div>
+                <label className="font-semibold text-slate-700 block mb-1">Contact Phone:</label>
+                <input
+                  type="text"
+                  value={manualPhone}
+                  onChange={(e) => setManualPhone(e.target.value)}
+                  placeholder="e.g. 0917-123-4567"
+                  className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-lg"
+                />
+              </div>
+              {orderType === 'delivery' && (
+                <>
+                  <div>
+                    <label className="font-semibold text-slate-700 block mb-1">Street Address:</label>
+                    <input
+                      type="text"
+                      value={manualAddress}
+                      onChange={(e) => setManualAddress(e.target.value)}
+                      placeholder="Purok / Street / Landmark"
+                      className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-lg"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="font-semibold text-slate-700 block mb-1">Barangay:</label>
+                    <input
+                      type="text"
+                      value={manualBarangay}
+                      onChange={(e) => setManualBarangay(e.target.value)}
+                      className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-lg"
+                    />
+                  </div>
+                </>
+              )}
+            </div>
+          )}
+
           {/* Delivery Address & Geolocation info */}
           {currentCustomer && orderType === 'delivery' && (
             <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
@@ -187,7 +303,10 @@ export const NewOrderModal = ({ isOpen, onClose }) => {
                 <span>Delivery Address: {currentCustomer.primaryAddress}</span>
               </div>
               <div className="text-[11px] text-slate-500">
-                Contact: {currentCustomer.contactNumber} • Map Pin: {currentCustomer.coordinates.lat.toFixed(4)}, {currentCustomer.coordinates.lng.toFixed(4)}
+                Contact: {currentCustomer.contactNumber} • Map Pin:{' '}
+                {currentCustomer.coordinates?.lat != null && currentCustomer.coordinates?.lng != null
+                  ? `${currentCustomer.coordinates.lat.toFixed(4)}, ${currentCustomer.coordinates.lng.toFixed(4)}`
+                  : 'Station Default'}
               </div>
               {currentCustomer.deliveryNotes && (
                 <div className="text-[11px] text-amber-700 font-medium">
@@ -318,7 +437,7 @@ export const NewOrderModal = ({ isOpen, onClose }) => {
               <label className="font-semibold text-slate-700 block mb-1">Payment Status:</label>
               <select
                 value={paymentStatus}
-                onChange={(e) => setPaymentStatus(e.target.value  | 'unpaid')}
+                onChange={(e) => setPaymentStatus(e.target.value || 'unpaid')}
                 className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl"
               >
                 <option value="unpaid">Unpaid / Pay Upon Receipt</option>

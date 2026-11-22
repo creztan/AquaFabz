@@ -58,9 +58,11 @@ export const CustomerPortalView = () => {
             Track your live water refills, view borrowed container deposits, and request instant station deliveries.
           </p>
           <div className="flex flex-wrap items-center gap-3 mt-3 text-xs text-cyan-200">
-            <span>📍 {customer?.primaryAddress} ({customer?.barangay})</span>
+            <span>
+              📍 {customer?.primaryAddress || settings?.address || 'Binalbagan'} ({customer?.barangay || settings?.barangay || 'Brgy. Enclaro'})
+            </span>
             <span>•</span>
-            <span>📞 {customer?.contactNumber}</span>
+            <span>📞 {customer?.contactNumber || currentUser?.phone || 'Not set'}</span>
           </div>
         </div>
 
@@ -133,7 +135,10 @@ export const CustomerPortalView = () => {
             </p>
           </div>
           <span className="text-xs text-cyan-700 font-mono bg-cyan-50 px-2.5 py-1 rounded-xl font-bold">
-            📍 Coordinates: {customer?.coordinates.lat.toFixed(4)}, {customer?.coordinates.lng.toFixed(4)}
+            📍 Coordinates:{' '}
+            {customer?.coordinates?.lat != null && customer?.coordinates?.lng != null
+              ? `${customer.coordinates.lat.toFixed(4)}, ${customer.coordinates.lng.toFixed(4)}`
+              : `${(settings?.coordinates?.lat ?? 10.2014).toFixed(4)}, ${(settings?.coordinates?.lng ?? 122.8601).toFixed(4)}`}
           </span>
         </div>
 

@@ -83,7 +83,7 @@ export const PrintModal = () => {
             {/* Footer */}
             <div className="text-center pt-4 border-t border-dashed border-slate-300 text-[10px] text-slate-500 font-sans">
               <p className="font-semibold text-slate-700">Thank you for choosing safe drinking water!</p>
-              <p className="mt-0.5">This document serves  Official Transaction Record.</p>
+              <p className="mt-0.5">This document serves as an Official Transaction Record.</p>
               <p className="mt-1 text-[9px] text-slate-400">AquaFabz Station Management System</p>
             </div>
           </div>
