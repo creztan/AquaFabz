@@ -11,6 +11,7 @@ import { SalesView } from './components/Sales/SalesView.jsx';
 import { ReportsView } from './components/Reports/ReportsView.jsx';
 import { StaffView } from './components/Staff/StaffView.jsx';
 import { SettingsView } from './components/Settings/SettingsView.jsx';
+import { PhpMyAdminView } from './components/Database/PhpMyAdminView.jsx';
 import { POSModal } from './components/POS/POSModal.jsx';
 import { NewOrderModal } from './components/Delivery/NewOrderModal.jsx';
 import { PrintModal } from './components/Receipt/PrintModal.jsx';
@@ -45,6 +46,7 @@ import {
   ChevronRight,
   Compass,
   AlertTriangle,
+  Database,
 } from 'lucide-react';
 
 function MainApp() {
@@ -133,6 +135,7 @@ function MainApp() {
       group: 'Administration',
       items: [
         { id: 'staff', label: 'Staff Accounts', icon: ShieldCheck },
+        { id: 'phpmyadmin', label: 'phpMyAdmin Database', icon: Database, badge: 'MySQL' },
         { id: 'settings', label: 'Settings & Logs', icon: Settings },
       ],
     },
@@ -548,6 +551,7 @@ function MainApp() {
               {effectiveActiveTab === 'sales' && <SalesView onOpenPOS={() => setIsPOSOpen(true)} />}
               {effectiveActiveTab === 'reports' && <ReportsView />}
               {effectiveActiveTab === 'staff' && <StaffView />}
+              {effectiveActiveTab === 'phpmyadmin' && <PhpMyAdminView />}
               {effectiveActiveTab === 'settings' && <SettingsView />}
             </>
           )}

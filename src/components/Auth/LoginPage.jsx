@@ -33,13 +33,13 @@ export const LoginPage = ({
   const [selectedPortal, setSelectedPortal] = useState('admin');
 
   // Form States for Personnel
-  const [username, setUsername] = useState('admin');
-  const [password, setPassword] = useState('password123');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
   // Form States for Customer Portal
-  const [customerIdentifier, setCustomerIdentifier] = useState('verde');
-  const [customerPassword, setCustomerPassword] = useState('password123');
+  const [customerIdentifier, setCustomerIdentifier] = useState('');
+  const [customerPassword, setCustomerPassword] = useState('');
   const [showCustomerPassword, setShowCustomerPassword] = useState(false);
 
   const [errorMessage, setErrorMessage] = useState('');
@@ -49,19 +49,10 @@ export const LoginPage = ({
   const handleSwitchPortal = (portalKey) => {
     setSelectedPortal(portalKey);
     setErrorMessage('');
-    if (portalKey === 'admin') {
-      setUsername('admin');
-      setPassword('password123');
-    } else if (portalKey === 'staff') {
-      setUsername('chrysty');
-      setPassword('password123');
-    } else if (portalKey === 'delivery') {
-      setUsername('jacob');
-      setPassword('password123');
-    } else if (portalKey === 'customer') {
-      setCustomerIdentifier('verde');
-      setCustomerPassword('password123');
-    }
+    setUsername('');
+    setPassword('');
+    setCustomerIdentifier('');
+    setCustomerPassword('');
   };
 
   const handlePersonnelSubmit = (e) => {
@@ -244,9 +235,7 @@ export const LoginPage = ({
           {/* ADMIN PORTAL FORM */}
           {selectedPortal === 'admin' && (
             <form onSubmit={handlePersonnelSubmit} className="space-y-4 text-xs">
-              <div className="p-3 rounded-xl bg-cyan-950/40 border border-cyan-800/40 text-cyan-200 text-xs">
-                👤 Preset Profile: <strong>Eugene P. Senining</strong> (Station Owner / Administrator)
-              </div>
+
 
               <div>
                 <label className="font-medium text-slate-300 block mb-1.5">Username:</label>
@@ -297,9 +286,7 @@ export const LoginPage = ({
           {/* STAFF PORTAL FORM */}
           {selectedPortal === 'staff' && (
             <form onSubmit={handlePersonnelSubmit} className="space-y-4 text-xs">
-              <div className="p-3 rounded-xl bg-sky-950/40 border border-sky-800/40 text-sky-200 text-xs">
-                👤 Preset Profile: <strong>Chrysty Mae L. Castillo</strong> (Station Staff / Cashier)
-              </div>
+
 
               <div>
                 <label className="font-medium text-slate-300 block mb-1.5">Username:</label>
@@ -463,61 +450,7 @@ export const LoginPage = ({
                 </div>
               </div>
 
-              {/* Quick Demo Customer Account Shortcuts */}
-              <div>
-                <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block mb-1.5">
-                  Quick-Fill Verified Demo Accounts:
-                </span>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setCustomerIdentifier('verde');
-                      setCustomerPassword('password123');
-                    }}
-                    className={`p-2 rounded-xl border text-left cursor-pointer transition-colors ${
-                      customerIdentifier === 'verde'
-                        ? 'bg-blue-950/80 border-blue-500 text-white'
-                        : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-slate-200'
-                    }`}
-                  >
-                    <div className="font-bold text-[11px] truncate">Verde Family</div>
-                    <div className="text-[10px] text-cyan-400 font-mono">verde</div>
-                  </button>
 
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setCustomerIdentifier('mamachits');
-                      setCustomerPassword('password123');
-                    }}
-                    className={`p-2 rounded-xl border text-left cursor-pointer transition-colors ${
-                      customerIdentifier === 'mamachits'
-                        ? 'bg-blue-950/80 border-blue-500 text-white'
-                        : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-slate-200'
-                    }`}
-                  >
-                    <div className="font-bold text-[11px] truncate">Mama Chit's Grill</div>
-                    <div className="text-[10px] text-cyan-400 font-mono">mamachits</div>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setCustomerIdentifier('binalbagan_it');
-                      setCustomerPassword('password123');
-                    }}
-                    className={`p-2 rounded-xl border text-left cursor-pointer transition-colors ${
-                      customerIdentifier === 'binalbagan_it'
-                        ? 'bg-blue-950/80 border-blue-500 text-white'
-                        : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-slate-200'
-                    }`}
-                  >
-                    <div className="font-bold text-[11px] truncate">Binalbagan IT Dept</div>
-                    <div className="text-[10px] text-cyan-400 font-mono">binalbagan_it</div>
-                  </button>
-                </div>
-              </div>
 
               {/* Submit Button */}
               <button

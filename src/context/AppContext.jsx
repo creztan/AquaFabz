@@ -50,7 +50,7 @@ export const AppProvider = ({ children }) => {
 
   const [customers, setCustomers] = useState(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.CUSTOMERS);
-    return saved ? JSON.parse(saved) : initialCustomers;
+    return saved ? JSON.parse(saved) : [];
   });
 
   const [products, setProducts] = useState(() => {
@@ -60,37 +60,37 @@ export const AppProvider = ({ children }) => {
 
   const [vendingMachines, setVendingMachines] = useState(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.VENDING_MACHINES);
-    return saved ? JSON.parse(saved) : initialVendingMachines;
+    return saved ? JSON.parse(saved) : [];
   });
 
   const [vendingSales, setVendingSales] = useState(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.VENDING_SALES);
-    return saved ? JSON.parse(saved) : initialVendingSales;
+    return saved ? JSON.parse(saved) : [];
   });
 
   const [orders, setOrders] = useState(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.ORDERS);
-    return saved ? JSON.parse(saved) : initialOrders;
+    return saved ? JSON.parse(saved) : [];
   });
 
   const [sales, setSales] = useState(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.SALES);
-    return saved ? JSON.parse(saved) : initialSales;
+    return saved ? JSON.parse(saved) : [];
   });
 
   const [containers, setContainers] = useState(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.CONTAINERS);
-    return saved ? JSON.parse(saved) : initialContainers;
+    return saved ? JSON.parse(saved) : [];
   });
 
   const [stockMovements, setStockMovements] = useState(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.STOCK_MOVEMENTS);
-    return saved ? JSON.parse(saved) : initialStockMovements;
+    return saved ? JSON.parse(saved) : [];
   });
 
   const [activityLogs, setActivityLogs] = useState(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.ACTIVITY_LOGS);
-    return saved ? JSON.parse(saved) : initialActivityLogs;
+    return saved ? JSON.parse(saved) : [];
   });
 
   const [settings, setSettings] = useState(() => {
